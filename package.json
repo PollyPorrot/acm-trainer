@@ -9,7 +9,7 @@
     "dev": "npm run dev:renderer",
     "dev:renderer": "vite --host 127.0.0.1",
     "dev:electron": "node -e \"console.error('Electron main process is added in Task 2. Use npm run dev for the renderer scaffold.'); process.exit(1)\"",
-    "build:main": "tsc -p tsconfig.node.json",
+    "build:main": "node -e \"console.error('Electron main process is added in Task 2.'); process.exit(1)\"",
     "build": "tsc --noEmit && vite build",
     "test": "vitest --passWithNoTests",
     "package": "electron-builder"
