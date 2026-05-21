@@ -65,6 +65,32 @@ describe("sqlite repositories", () => {
     expect(() => initializeSchema(db)).not.toThrow();
   });
 
+  test("required tables use integer id primary keys", () => {
+    const requiredTables = [
+      "contest_cache",
+      "vp_contests",
+      "vp_reviews",
+      "vp_review_tags",
+      "image_wall_items",
+      "image_wall_tags",
+      "settings",
+      "daily_reminder_state"
+    ];
+
+    for (const table of requiredTables) {
+      const columns = db.prepare(`pragma table_info(${table})`).all() as Array<{
+        name: string;
+        type: string;
+        pk: number;
+      }>;
+      const idColumn = columns.find((column) => column.name === "id");
+
+      expect(idColumn, `${table} has an id column`).toBeDefined();
+      expect(idColumn?.type.toLowerCase(), `${table}.id is integer`).toBe("integer");
+      expect(idColumn?.pk, `${table}.id is primary key`).toBe(1);
+    }
+  });
+
   test("VP contest CRUD", () => {
     const created = createVpContest(db, {
       platform: "codeforces",

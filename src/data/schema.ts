@@ -96,13 +96,15 @@ export function initializeSchema(db: AppDatabase): void {
       on image_wall_tags(image_wall_item_id);
 
     create table if not exists settings (
-      key text primary key,
+      id integer primary key autoincrement,
+      key text not null unique,
       value_json text not null,
       updated_at_iso text not null
     );
 
     create table if not exists daily_reminder_state (
-      local_date_key text primary key,
+      id integer primary key autoincrement,
+      local_date_key text not null unique,
       contest_reminder_shown_at_iso text,
       image_reminder_shown_at_iso text,
       selected_image_wall_item_id integer references image_wall_items(id) on delete set null
