@@ -1,4 +1,5 @@
 import { ExternalLink, Pencil, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { formatLocalDateTimeInput, parseLocalDateTimeInput } from "../../shared/date";
@@ -130,7 +131,7 @@ export function VpContestPage() {
     }
   }
 
-  async function submitForm(event: React.FormEvent<HTMLFormElement>) {
+  async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const scheduledAtIso = parseLocalDateTimeInput(form.scheduledAtInput);
 
