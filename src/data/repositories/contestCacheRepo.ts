@@ -41,7 +41,7 @@ function mapContestCacheRow(row: ContestCacheRow): ContestCacheItem {
   };
 }
 
-export function upsertContestCache(db: AppDatabase, items: readonly ContestCacheInput[]): ContestCacheItem[] {
+function saveContestCacheItems(db: AppDatabase, items: readonly ContestCacheInput[]): ContestCacheItem[] {
   const upsert = db.prepare(`
     insert into contest_cache (
       platform,
@@ -66,24 +66,43 @@ export function upsertContestCache(db: AppDatabase, items: readonly ContestCache
     select * from contest_cache where platform = ? and provider_contest_id = ?
   `);
 
+  const saved: ContestCacheItem[] = [];
+
+  for (const item of items) {
+    upsert.run(
+      item.platform,
+      item.providerContestId,
+      item.title,
+      item.url,
+      item.startTimeIso,
+      item.endTimeIso ?? null,
+      item.durationSeconds ?? null,
+      item.fetchedAtIso
+    );
+    saved.push(mapContestCacheRow(get.get(item.platform, item.providerContestId) as ContestCacheRow));
+  }
+
+  return saved;
+}
+
+export function upsertContestCache(db: AppDatabase, items: readonly ContestCacheInput[]): ContestCacheItem[] {
+  const transaction = db.transaction((entries: readonly ContestCacheInput[]) => saveContestCacheItems(db, entries));
+
+  return transaction(items);
+}
+
+export function replaceContestCacheForPlatform(
+  db: AppDatabase,
+  platform: Platform,
+  items: readonly ContestCacheInput[]
+): ContestCacheItem[] {
+  if (items.some((item) => item.platform !== platform)) {
+    throw new Error(`Contest cache replacement received mixed platforms for ${platform}`);
+  }
+
   const transaction = db.transaction((entries: readonly ContestCacheInput[]) => {
-    const saved: ContestCacheItem[] = [];
-
-    for (const item of entries) {
-      upsert.run(
-        item.platform,
-        item.providerContestId,
-        item.title,
-        item.url,
-        item.startTimeIso,
-        item.endTimeIso ?? null,
-        item.durationSeconds ?? null,
-        item.fetchedAtIso
-      );
-      saved.push(mapContestCacheRow(get.get(item.platform, item.providerContestId) as ContestCacheRow));
-    }
-
-    return saved;
+    db.prepare("delete from contest_cache where platform = ?").run(platform);
+    return saveContestCacheItems(db, entries);
   });
 
   return transaction(items);

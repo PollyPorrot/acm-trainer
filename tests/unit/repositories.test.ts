@@ -4,6 +4,7 @@ import { initializeSchema } from "../../src/data/schema";
 import { monthKeyFromIso } from "../../src/shared/date";
 import {
   listContestCache,
+  replaceContestCacheForPlatform,
   upsertContestCache
 } from "../../src/data/repositories/contestCacheRepo";
 import {
@@ -294,6 +295,51 @@ describe("sqlite repositories", () => {
         startTimeIso: "2026-05-22T13:00:00.000Z",
         fetchedAtIso: "2026-05-22T00:00:00.000Z"
       }
+    ]);
+  });
+
+  test("contest cache platform replacement removes stale provider rows only for that platform", () => {
+    upsertContestCache(db, [
+      {
+        platform: "codeforces",
+        providerContestId: "1000",
+        title: "Stale Codeforces round",
+        url: "https://codeforces.com/contest/1000",
+        startTimeIso: "2026-05-22T12:00:00.000Z",
+        endTimeIso: undefined,
+        durationSeconds: 7200,
+        fetchedAtIso: "2026-05-21T00:00:00.000Z"
+      },
+      {
+        platform: "atcoder",
+        providerContestId: "abc400",
+        title: "AtCoder remains cached",
+        url: "https://atcoder.jp/contests/abc400",
+        startTimeIso: "2026-05-23T12:00:00.000Z",
+        endTimeIso: undefined,
+        durationSeconds: 6000,
+        fetchedAtIso: "2026-05-21T00:00:00.000Z"
+      }
+    ]);
+
+    replaceContestCacheForPlatform(db, "codeforces", [
+      {
+        platform: "codeforces",
+        providerContestId: "1001",
+        title: "Fresh Codeforces round",
+        url: "https://codeforces.com/contest/1001",
+        startTimeIso: "2026-05-24T12:00:00.000Z",
+        endTimeIso: undefined,
+        durationSeconds: 7200,
+        fetchedAtIso: "2026-05-22T00:00:00.000Z"
+      }
+    ]);
+
+    expect(listContestCache(db, { platform: "codeforces" }).map((item) => item.providerContestId)).toEqual([
+      "1001"
+    ]);
+    expect(listContestCache(db, { platform: "atcoder" }).map((item) => item.providerContestId)).toEqual([
+      "abc400"
     ]);
   });
 });
