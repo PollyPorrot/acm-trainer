@@ -6,6 +6,9 @@ test("Electron app shell opens the ACM Trainer renderer", async () => {
 
   await expect(page.getByRole("heading", { name: "ACM Trainer" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Primary navigation" })).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => typeof window.acmTrainer?.getSettings))
+    .toBe("function");
 
   await app.close();
 });

@@ -9,7 +9,7 @@
     "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "vite --host 127.0.0.1",
     "dev:electron": "wait-on http://127.0.0.1:5173 && npm run build:main && electron .",
-    "build:main": "tsc -p tsconfig.node.json",
+    "build:main": "tsc -p tsconfig.node.json && tsc -p tsconfig.preload.json && node -e \"const fs=require('fs'); const js='dist-electron/preload/preload.js'; const cjs='dist-electron/preload/preload.cjs'; if (fs.existsSync(cjs)) fs.rmSync(cjs); fs.renameSync(js, cjs);\"",
     "build": "tsc --noEmit && vite build && npm run build:main",
     "test": "vitest --passWithNoTests",
     "package": "electron-builder"

@@ -21,7 +21,9 @@ describe("Electron shell scaffold", () => {
     expect(pkg.scripts["dev:electron"]).toBe(
       "wait-on http://127.0.0.1:5173 && npm run build:main && electron ."
     );
-    expect(pkg.scripts["build:main"]).toBe("tsc -p tsconfig.node.json");
+    expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.node.json");
+    expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.preload.json");
+    expect(pkg.scripts["build:main"]).toContain("dist-electron/preload/preload.cjs");
   });
 
   test("main and preload entry points exist", () => {

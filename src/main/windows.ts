@@ -3,8 +3,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const preloadPath = join(currentDir, "../preload/preload.js");
+const preloadPath = join(currentDir, "../preload/preload.cjs");
 const devServerUrl = "http://127.0.0.1:5173";
+const allowedExternalProtocols = new Set(["https:", "http:", "mailto:"]);
 
 export type ManagedWindow = "main" | "reminder" | "timer";
 
@@ -34,23 +35,44 @@ function getRendererUrl(route = ""): string {
 }
 
 function isAllowedAppUrl(targetUrl: string): boolean {
-  if (!app.isPackaged) {
-    return targetUrl.startsWith(devServerUrl);
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch {
+    return false;
   }
 
-  return targetUrl.startsWith(pathToFileURL(join(app.getAppPath(), "dist", "index.html")).toString());
+  if (!app.isPackaged) {
+    return parsedUrl.origin === devServerUrl;
+  }
+
+  const appUrl = new URL(pathToFileURL(join(app.getAppPath(), "dist", "index.html")).toString());
+  return parsedUrl.protocol === "file:" && parsedUrl.pathname === appUrl.pathname;
+}
+
+function openTrustedExternalUrl(targetUrl: string): void {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch {
+    return;
+  }
+
+  if (allowedExternalProtocols.has(parsedUrl.protocol)) {
+    void shell.openExternal(targetUrl);
+  }
 }
 
 function lockNavigationToApp(window: BrowserWindow): void {
   window.webContents.setWindowOpenHandler(({ url }) => {
-    void shell.openExternal(url);
+    openTrustedExternalUrl(url);
     return { action: "deny" };
   });
 
   window.webContents.on("will-navigate", (event, url) => {
     if (!isAllowedAppUrl(url)) {
       event.preventDefault();
-      void shell.openExternal(url);
+      openTrustedExternalUrl(url);
     }
   });
 }

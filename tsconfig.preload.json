@@ -2,10 +2,10 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "rootDir": "src",
-    "outDir": "dist-electron",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "rootDir": "src/preload",
+    "outDir": "dist-electron/preload",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -14,7 +14,5 @@
     "isolatedModules": true,
     "types": ["node"]
   },
-  "include": [
-    "src/main/**/*.ts"
-  ]
+  "include": ["src/preload/**/*.ts"]
 }
