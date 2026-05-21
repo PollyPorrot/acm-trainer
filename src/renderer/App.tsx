@@ -3,9 +3,9 @@ const navItems = ["Today", "Contest Reminders", "VP Contests", "Reviews", "Image
 export function App() {
   return (
     <main className="app-shell">
-      <aside className="sidebar" aria-label="Primary navigation">
+      <aside className="sidebar">
         <div className="brand">ACM Trainer</div>
-        <nav className="nav-list">
+        <nav className="nav-list" aria-label="Primary navigation">
           {navItems.map((item) => (
             <button className="nav-item" type="button" key={item}>
               {item}

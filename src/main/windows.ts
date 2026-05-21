@@ -1,5 +1,5 @@
-import { BrowserWindow, app } from "electron";
-import { fileURLToPath } from "node:url";
+import { BrowserWindow, app, shell } from "electron";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
@@ -29,21 +29,47 @@ function getRendererUrl(route = ""): string {
     return `${devServerUrl}/${suffix}`;
   }
 
-  return `file://${join(app.getAppPath(), "dist", "index.html")}${suffix}`;
+  const fileUrl = pathToFileURL(join(app.getAppPath(), "dist", "index.html")).toString();
+  return `${fileUrl}${suffix}`;
+}
+
+function isAllowedAppUrl(targetUrl: string): boolean {
+  if (!app.isPackaged) {
+    return targetUrl.startsWith(devServerUrl);
+  }
+
+  return targetUrl.startsWith(pathToFileURL(join(app.getAppPath(), "dist", "index.html")).toString());
+}
+
+function lockNavigationToApp(window: BrowserWindow): void {
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    void shell.openExternal(url);
+    return { action: "deny" };
+  });
+
+  window.webContents.on("will-navigate", (event, url) => {
+    if (!isAllowedAppUrl(url)) {
+      event.preventDefault();
+      void shell.openExternal(url);
+    }
+  });
 }
 
 function createBaseWindow(options: Electron.BrowserWindowConstructorOptions): BrowserWindow {
-  return new BrowserWindow({
+  const window = new BrowserWindow({
     show: false,
     backgroundColor: "#f7f9fb",
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false
+      sandbox: true
     },
     ...options
   });
+
+  lockNavigationToApp(window);
+  return window;
 }
 
 export function createWindowManager(state: WindowManagerState): WindowManager {
