@@ -10,9 +10,16 @@ const appState = {
 let tray: Tray | null = null;
 const windows = createWindowManager(appState);
 
+function logStartupError(error: unknown): void {
+  console.error(error instanceof Error ? error.stack : error);
+}
+
 function quitApplication(): void {
   appState.isQuitting = true;
 }
+
+process.on("uncaughtException", logStartupError);
+process.on("unhandledRejection", logStartupError);
 
 app.on("before-quit", quitApplication);
 
@@ -28,7 +35,7 @@ app.whenReady().then(() => {
       windows.showMainWindow();
     }
   });
-});
+}).catch(logStartupError);
 
 app.on("window-all-closed", () => {
   if (process.platform !== "win32" && process.platform !== "darwin") {

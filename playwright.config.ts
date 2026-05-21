@@ -6,9 +6,9 @@ export default defineConfig({
   fullyParallel: true,
   reporter: "list",
   webServer: {
-    command: "npm run build:main && npm run dev:renderer",
+    command: "npm run build:main && npm run rebuild:electron && npm run dev:renderer",
     url: "http://127.0.0.1:5173",
-    reuseExistingServer: true
+    reuseExistingServer: false
   },
   use: {
     baseURL: "http://127.0.0.1:5173",

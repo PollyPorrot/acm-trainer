@@ -19,8 +19,10 @@ describe("Electron shell scaffold", () => {
     expect(pkg.scripts.dev).toContain("concurrently");
     expect(pkg.scripts["dev:renderer"]).toBe("vite --host 127.0.0.1");
     expect(pkg.scripts["dev:electron"]).toBe(
-      "wait-on http://127.0.0.1:5173 && npm run build:main && electron ."
+      "wait-on http://127.0.0.1:5173 && npm run build:main && npm run rebuild:electron && electron ."
     );
+    expect(pkg.scripts.test).toContain("npm run rebuild:node");
+    expect(pkg.scripts.start).toContain("npm run rebuild:electron");
     expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.node.json");
     expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.preload.json");
     expect(pkg.scripts["build:main"]).toContain("dist-electron/preload/preload.cjs");

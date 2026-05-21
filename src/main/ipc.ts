@@ -1,48 +1,132 @@
 import { app, ipcMain } from "electron";
+import { createDatabase, type AppDatabase } from "../data/db.js";
+import { listContestCache } from "../data/repositories/contestCacheRepo.js";
+import {
+  getAppSettings,
+  updateAppSettings
+} from "../data/repositories/settingsRepo.js";
+import {
+  createImageWallItem,
+  deleteImageWallItem,
+  listImageWallItems,
+  updateImageWallItem,
+  type CreateImageWallItemInput,
+  type UpdateImageWallItemInput
+} from "../data/repositories/imageWallRepo.js";
+import {
+  createVpContest,
+  deleteVpContest,
+  listVpContests,
+  updateVpContest,
+  type CreateVpContestInput,
+  type UpdateVpContestInput
+} from "../data/repositories/vpContestRepo.js";
+import {
+  createVpReview,
+  deleteVpReview,
+  listVpReviews,
+  updateVpReview,
+  type CreateVpReviewInput,
+  type UpdateVpReviewInput
+} from "../data/repositories/vpReviewRepo.js";
 import { getAutostartEnabled, setAutostartEnabled } from "./autostart.js";
+import { refreshContestCache } from "./contestRefresh.js";
 import { openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
+import type { AppSettings } from "../shared/types.js";
 import type { WindowManager } from "./windows.js";
 
 export interface IpcContext {
   windows: WindowManager;
+  db?: AppDatabase;
 }
 
-const emptyList: unknown[] = [];
+type UnknownRecord = Record<string, unknown>;
 
-export function registerIpcHandlers({ windows }: IpcContext): void {
-  ipcMain.handle("settings:get", () => ({
-    autostartEnabled: getAutostartEnabled(),
-    contestReminderEnabled: true,
-    randomImageReminderEnabled: true,
-    dataPath: app.getPath("userData")
-  }));
+function asRecord(value: unknown): UnknownRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : {};
+}
+
+function asId(value: unknown): string {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  throw new Error("Expected record id");
+}
+
+function localDayRange(now = new Date()): { fromIso: string; toIso: string } {
+  const from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
+  return {
+    fromIso: from.toISOString(),
+    toIso: to.toISOString()
+  };
+}
+
+function readSettings(db: AppDatabase): AppSettings {
+  return {
+    ...getAppSettings(db),
+    launchAtStartup: getAutostartEnabled(),
+    dataDirectory: app.getPath("userData")
+  };
+}
+
+export function registerIpcHandlers({ windows, db = createDatabase() }: IpcContext): void {
+  app.once("quit", () => {
+    db.close();
+  });
+
+  ipcMain.handle("settings:get", () => readSettings(db));
+
+  ipcMain.handle("settings:update", (_event, patch: Partial<AppSettings>) => {
+    const settingsPatch = asRecord(patch) as Partial<AppSettings>;
+
+    if (typeof settingsPatch.launchAtStartup === "boolean") {
+      setAutostartEnabled(settingsPatch.launchAtStartup);
+    }
+
+    updateAppSettings(db, {
+      ...settingsPatch,
+      launchAtStartup: getAutostartEnabled(),
+      dataDirectory: app.getPath("userData")
+    });
+
+    return readSettings(db);
+  });
 
   ipcMain.handle("settings:setAutostart", (_event, enabled: boolean) => {
     setAutostartEnabled(Boolean(enabled));
-    return { autostartEnabled: getAutostartEnabled() };
+    updateAppSettings(db, { launchAtStartup: getAutostartEnabled() });
+    return readSettings(db);
   });
 
-  ipcMain.handle("contests:refresh", () => ({
-    contests: emptyList,
-    failedProviders: emptyList,
-    refreshedAt: new Date().toISOString()
-  }));
-  ipcMain.handle("contests:listToday", () => emptyList);
+  ipcMain.handle("contests:refresh", () => refreshContestCache(db));
+  ipcMain.handle("contests:listToday", () => listContestCache(db, localDayRange()));
 
-  ipcMain.handle("vp:list", () => emptyList);
-  ipcMain.handle("vp:create", (_event, draft) => ({ ...draft, id: "placeholder" }));
-  ipcMain.handle("vp:update", (_event, id: string, patch) => ({ id, ...patch }));
-  ipcMain.handle("vp:delete", () => ({ ok: true }));
+  ipcMain.handle("vp:list", (_event, filters) => listVpContests(db, asRecord(filters)));
+  ipcMain.handle("vp:create", (_event, draft) => createVpContest(db, asRecord(draft) as CreateVpContestInput));
+  ipcMain.handle("vp:update", (_event, id: unknown, patch) =>
+    updateVpContest(db, asId(id), asRecord(patch) as UpdateVpContestInput)
+  );
+  ipcMain.handle("vp:delete", (_event, id: unknown) => ({ ok: deleteVpContest(db, asId(id)) }));
 
-  ipcMain.handle("reviews:list", () => emptyList);
-  ipcMain.handle("reviews:create", (_event, draft) => ({ ...draft, id: "placeholder" }));
-  ipcMain.handle("reviews:update", (_event, id: string, patch) => ({ id, ...patch }));
-  ipcMain.handle("reviews:delete", () => ({ ok: true }));
+  ipcMain.handle("reviews:list", (_event, filters) => listVpReviews(db, asRecord(filters)));
+  ipcMain.handle("reviews:create", (_event, draft) => createVpReview(db, asRecord(draft) as CreateVpReviewInput));
+  ipcMain.handle("reviews:update", (_event, id: unknown, patch) =>
+    updateVpReview(db, asId(id), asRecord(patch) as UpdateVpReviewInput)
+  );
+  ipcMain.handle("reviews:delete", (_event, id: unknown) => ({ ok: deleteVpReview(db, asId(id)) }));
 
-  ipcMain.handle("images:list", () => emptyList);
-  ipcMain.handle("images:import", () => emptyList);
-  ipcMain.handle("images:update", (_event, id: string, patch) => ({ id, ...patch }));
-  ipcMain.handle("images:delete", () => ({ ok: true }));
+  ipcMain.handle("images:list", (_event, filters) => listImageWallItems(db, asRecord(filters)));
+  ipcMain.handle("images:import", (_event, items) => {
+    const drafts = Array.isArray(items) ? items : [];
+    return drafts.map((draft) => createImageWallItem(db, asRecord(draft) as CreateImageWallItemInput));
+  });
+  ipcMain.handle("images:update", (_event, id: unknown, patch) =>
+    updateImageWallItem(db, asId(id), asRecord(patch) as UpdateImageWallItemInput)
+  );
+  ipcMain.handle("images:delete", (_event, id: unknown) => ({ ok: deleteImageWallItem(db, asId(id)) }));
 
   ipcMain.handle("timer:open", (_event, alwaysOnTop?: boolean) => {
     openTimerWindow(windows, alwaysOnTop ?? true);
