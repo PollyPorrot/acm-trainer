@@ -4,15 +4,14 @@
   "private": true,
   "description": "Windows desktop ACM training assistant.",
   "type": "module",
-  "main": "dist/main/main.js",
+  "main": "dist-electron/main/main.js",
   "scripts": {
-    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev": "npm run dev:renderer",
     "dev:renderer": "vite --host 127.0.0.1",
-    "dev:electron": "wait-on http://127.0.0.1:5173 && electron .",
+    "dev:electron": "node -e \"console.error('Electron main process is added in Task 2. Use npm run dev for the renderer scaffold.'); process.exit(1)\"",
+    "build:main": "tsc -p tsconfig.node.json",
     "build": "tsc --noEmit && vite build",
     "test": "vitest --passWithNoTests",
-    "start": "electron .",
-    "electron": "electron .",
     "package": "electron-builder"
   },
   "dependencies": {
