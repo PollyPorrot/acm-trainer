@@ -56,15 +56,31 @@ export function parseLocalDateTimeInput(value: string) {
   }
 
   const [, year, month, day, hours, minutes] = match;
+  const yearNumber = Number(year);
+  const monthNumber = Number(month);
+  const dayNumber = Number(day);
+  const hoursNumber = Number(hours);
+  const minutesNumber = Number(minutes);
   const date = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hours),
-    Number(minutes),
+    yearNumber,
+    monthNumber - 1,
+    dayNumber,
+    hoursNumber,
+    minutesNumber,
     0,
     0
   );
 
-  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getFullYear() !== yearNumber ||
+    date.getMonth() + 1 !== monthNumber ||
+    date.getDate() !== dayNumber ||
+    date.getHours() !== hoursNumber ||
+    date.getMinutes() !== minutesNumber
+  ) {
+    return "";
+  }
+
+  return date.toISOString();
 }

@@ -33,4 +33,11 @@ describe("date helpers", () => {
 
     expect(parseLocalDateTimeInput("2026-11-09T06:07")).toBe(expected);
   });
+
+  test("parseLocalDateTimeInput rejects impossible local date and time values", () => {
+    expect(parseLocalDateTimeInput("2026-02-31T10:00")).toBe("");
+    expect(parseLocalDateTimeInput("2026-13-01T00:00")).toBe("");
+    expect(parseLocalDateTimeInput("2026-01-01T24:00")).toBe("");
+    expect(parseLocalDateTimeInput("2026-01-01T12:60")).toBe("");
+  });
 });
