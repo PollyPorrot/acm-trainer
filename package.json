@@ -1,0 +1,44 @@
+{
+  "name": "acm-trainer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Windows desktop ACM training assistant.",
+  "type": "module",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite --host 127.0.0.1",
+    "dev:electron": "wait-on http://127.0.0.1:5173 && electron .",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest --passWithNoTests",
+    "start": "electron .",
+    "electron": "electron .",
+    "package": "electron-builder"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "cheerio": "^1.1.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.6",
+    "electron-builder": "^26.0.12",
+    "jsdom": "^27.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.6",
+    "vitest": "^4.0.14",
+    "wait-on": "^9.0.3"
+  }
+}
