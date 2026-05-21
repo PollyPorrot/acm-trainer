@@ -1,7 +1,10 @@
 node_modules/
 dist/
+dist-electron/
 dist-packaged/
 coverage/
+test-results/
+*.tsbuildinfo
 .env
 .env.*
 npm-debug.log*
