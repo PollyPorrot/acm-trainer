@@ -184,6 +184,7 @@ describe("sqlite repositories", () => {
 
     expect(searchVpReviewsByTag(db, "dp").map((review) => review.id)).toEqual([matching.id]);
     expect(searchVpReviewsByTag(db, "DP").map((review) => review.id)).toEqual([matching.id]);
+    expect(listVpReviews(db, { tag: "bitmask" }).map((review) => review.id)).toEqual([matching.id]);
   });
 
   test("VP contest and review month filters use the local calendar month", () => {

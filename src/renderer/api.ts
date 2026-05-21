@@ -86,7 +86,8 @@ const reviewFiltersSchema = z.object({
   vpContestId: z.string().optional(),
   platform: platformSchema.optional(),
   monthKey: z.string().optional(),
-  keyword: z.string().optional()
+  keyword: z.string().optional(),
+  tag: z.string().optional()
 });
 
 const reviewDraftSchema = z.object({
@@ -152,7 +153,7 @@ export const api = {
   updateVpContest: (id: string, patch: Partial<Omit<VpContest, "id" | "createdAtIso" | "updatedAtIso">>) =>
     bridge().updateVpContest(idSchema.parse(id), record(vpContestPatchSchema.parse(patch))) as Promise<VpContest>,
   deleteVpContest: (id: string) => bridge().deleteVpContest(idSchema.parse(id)) as Promise<DeleteResult>,
-  listReviews: (filters: { vpContestId?: string; platform?: Platform; monthKey?: string; keyword?: string } = {}) =>
+  listReviews: (filters: { vpContestId?: string; platform?: Platform; monthKey?: string; keyword?: string; tag?: string } = {}) =>
     bridge().listReviews(record(reviewFiltersSchema.parse(filters))) as Promise<VpReview[]>,
   createReview: (draft: {
     vpContestId: string;

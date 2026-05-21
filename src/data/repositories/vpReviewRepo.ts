@@ -115,7 +115,7 @@ export function getVpReview(db: AppDatabase, id: string | number): VpReview | nu
 
 export function listVpReviews(
   db: AppDatabase,
-  filters: { vpContestId?: string; platform?: Platform; monthKey?: string; keyword?: string } = {}
+  filters: { vpContestId?: string; platform?: Platform; monthKey?: string; keyword?: string; tag?: string } = {}
 ): VpReview[] {
   const joins: string[] = [];
   const where: string[] = [];
@@ -123,6 +123,12 @@ export function listVpReviews(
 
   if (filters.platform || filters.monthKey) {
     joins.push("join vp_contests c on c.id = r.vp_contest_id");
+  }
+
+  if (filters.tag?.trim()) {
+    joins.push("join vp_review_tags t on t.vp_review_id = r.id");
+    where.push("t.tag = ? collate nocase");
+    params.push(filters.tag.trim());
   }
 
   if (filters.vpContestId) {
@@ -153,7 +159,7 @@ export function listVpReviews(
   }
 
   const sql = `
-    select r.*
+    select distinct r.*
     from vp_reviews r
     ${joins.join(" ")}
     ${where.length ? `where ${where.join(" and ")}` : ""}

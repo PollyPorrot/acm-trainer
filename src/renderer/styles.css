@@ -346,6 +346,10 @@ h2 {
   background: #ffffff;
 }
 
+.review-toolbar {
+  grid-template-columns: minmax(220px, 1fr) 160px 160px 170px;
+}
+
 .management-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
@@ -435,6 +439,18 @@ h2 {
   background: #fbfcfe;
 }
 
+.review-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px 40px;
+  min-height: 76px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e5eaf2;
+  border-radius: 7px;
+  background: #fbfcfe;
+}
+
 .row-main {
   display: grid;
   min-width: 0;
@@ -463,6 +479,30 @@ h2 {
   background: #ebe9fe;
   font-size: 12px;
   font-weight: 800;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 22px;
+}
+
+.tag-chip {
+  max-width: 150px;
+  overflow: hidden;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #175cd3;
+  background: #e8f1ff;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.large-textarea {
+  min-height: 170px;
 }
 
 .danger-button {
