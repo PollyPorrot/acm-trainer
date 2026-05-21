@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { createDatabase, type AppDatabase } from "../../src/data/db";
 import { initializeSchema } from "../../src/data/schema";
+import { monthKeyFromIso } from "../../src/shared/date";
 import {
   listContestCache,
   upsertContestCache
@@ -20,6 +21,7 @@ import {
   createVpContest,
   deleteVpContest,
   getVpContest,
+  listVpContests,
   updateVpContest
 } from "../../src/data/repositories/vpContestRepo";
 import {
@@ -181,6 +183,29 @@ describe("sqlite repositories", () => {
 
     expect(searchVpReviewsByTag(db, "dp").map((review) => review.id)).toEqual([matching.id]);
     expect(searchVpReviewsByTag(db, "DP").map((review) => review.id)).toEqual([matching.id]);
+  });
+
+  test("VP contest and review month filters use the local calendar month", () => {
+    const localFirstDay = new Date(2026, 4, 1, 0, 30);
+    const contest = createVpContest(db, {
+      platform: "qoj",
+      title: "Local month boundary VP",
+      url: "https://qoj.ac/contest/1",
+      scheduledAtIso: localFirstDay.toISOString(),
+      notes: "",
+      status: "completed"
+    });
+    const review = createVpReview(db, {
+      vpContestId: contest.id,
+      title: "Boundary review",
+      body: "This VP belongs to the local May calendar.",
+      resultTags: ["silver"],
+      tags: ["boundary"]
+    });
+    const localMonthKey = monthKeyFromIso(contest.scheduledAtIso);
+
+    expect(listVpContests(db, { monthKey: localMonthKey }).map((item) => item.id)).toContain(contest.id);
+    expect(listVpReviews(db, { monthKey: localMonthKey }).map((item) => item.id)).toContain(review.id);
   });
 
   test("image wall item CRUD", () => {

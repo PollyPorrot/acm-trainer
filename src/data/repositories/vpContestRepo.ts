@@ -1,5 +1,5 @@
 import type { Platform, VpContest, VpContestStatus } from "../../shared/types.js";
-import { nowIso, parseIntegerId } from "../db.js";
+import { localMonthRangeFromKey, nowIso, parseIntegerId } from "../db.js";
 import type { AppDatabase } from "../db.js";
 
 export type CreateVpContestInput = {
@@ -109,8 +109,14 @@ export function listVpContests(
   }
 
   if (filters.monthKey) {
-    where.push("scheduled_at_iso like ?");
-    params.push(`${filters.monthKey}%`);
+    const range = localMonthRangeFromKey(filters.monthKey);
+
+    if (range) {
+      where.push("scheduled_at_iso >= ? and scheduled_at_iso < ?");
+      params.push(range.startIso, range.endIso);
+    } else {
+      where.push("1 = 0");
+    }
   }
 
   if (filters.keyword) {

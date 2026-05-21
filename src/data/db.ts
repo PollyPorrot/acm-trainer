@@ -110,6 +110,26 @@ export function normalizeTags(tags: readonly string[] = []): string[] {
   return normalized;
 }
 
+export function localMonthRangeFromKey(monthKey: string): { startIso: string; endIso: string } | null {
+  const match = /^(\d{4})-(\d{2})$/.exec(monthKey);
+
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+
+  if (!Number.isSafeInteger(year) || month < 1 || month > 12) {
+    return null;
+  }
+
+  return {
+    startIso: new Date(year, month - 1, 1, 0, 0, 0, 0).toISOString(),
+    endIso: new Date(year, month, 1, 0, 0, 0, 0).toISOString()
+  };
+}
+
 export function nowIso(): string {
   return new Date().toISOString();
 }

@@ -1,5 +1,5 @@
 import type { Platform, VpReview } from "../../shared/types.js";
-import { normalizeTags, nowIso, parseIntegerId } from "../db.js";
+import { localMonthRangeFromKey, normalizeTags, nowIso, parseIntegerId } from "../db.js";
 import type { AppDatabase } from "../db.js";
 
 export type CreateVpReviewInput = {
@@ -136,8 +136,14 @@ export function listVpReviews(
   }
 
   if (filters.monthKey) {
-    where.push("c.scheduled_at_iso like ?");
-    params.push(`${filters.monthKey}%`);
+    const range = localMonthRangeFromKey(filters.monthKey);
+
+    if (range) {
+      where.push("c.scheduled_at_iso >= ? and c.scheduled_at_iso < ?");
+      params.push(range.startIso, range.endIso);
+    } else {
+      where.push("1 = 0");
+    }
   }
 
   if (filters.keyword) {
