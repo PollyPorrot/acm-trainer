@@ -32,6 +32,8 @@ import {
 import { getAutostartEnabled, setAutostartEnabled } from "./autostart.js";
 import { refreshContestCache } from "./contestRefresh.js";
 import { openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
+import { extractLinkMetadata } from "../shared/linkMetadata.js";
+import { detectPlatformFromUrl } from "../shared/platforms.js";
 import type { AppSettings } from "../shared/types.js";
 import type { WindowManager } from "./windows.js";
 
@@ -62,6 +64,32 @@ function localDayRange(now = new Date()): { fromIso: string; toIso: string } {
     fromIso: from.toISOString(),
     toIso: to.toISOString()
   };
+}
+
+async function recognizeContestLink(rawUrl: unknown) {
+  const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
+  const platform = detectPlatformFromUrl(url);
+  let title = "";
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
+      const response = await fetch(parsedUrl, {
+        headers: {
+          "user-agent": "ACM-Trainer/0.1"
+        }
+      });
+
+      if (response.ok) {
+        title = extractLinkMetadata(await response.text()).title;
+      }
+    }
+  } catch {
+    title = "";
+  }
+
+  return { url, platform, title };
 }
 
 function readSettings(db: AppDatabase): AppSettings {
@@ -105,6 +133,7 @@ export function registerIpcHandlers({ windows, db = createDatabase() }: IpcConte
   ipcMain.handle("contests:listToday", () => listContestCache(db, localDayRange()));
 
   ipcMain.handle("vp:list", (_event, filters) => listVpContests(db, asRecord(filters)));
+  ipcMain.handle("vp:recognizeLink", (_event, url: unknown) => recognizeContestLink(url));
   ipcMain.handle("vp:create", (_event, draft) => createVpContest(db, asRecord(draft) as CreateVpContestInput));
   ipcMain.handle("vp:update", (_event, id: unknown, patch) =>
     updateVpContest(db, asId(id), asRecord(patch) as UpdateVpContestInput)

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Layout, type AppPage } from "./components/Layout";
 import { TodayPage } from "./pages/TodayPage";
+import { VpContestPage } from "./pages/VpContestPage";
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -18,7 +19,7 @@ function renderPage(page: AppPage) {
     case "contests":
       return <PlaceholderPage title="比赛提醒" />;
     case "vp":
-      return <PlaceholderPage title="VP 比赛" />;
+      return <VpContestPage />;
     case "reviews":
       return <PlaceholderPage title="复盘" />;
     case "images":

@@ -24,6 +24,7 @@ type AcmTrainerBridge = {
   refreshContests: () => Promise<unknown>;
   listTodayContests: () => Promise<unknown>;
   listVpContests: (filters?: UnknownRecord) => Promise<unknown>;
+  recognizeVpContestLink: (url: string) => Promise<unknown>;
   createVpContest: (draft: UnknownRecord) => Promise<unknown>;
   updateVpContest: (id: string, patch: UnknownRecord) => Promise<unknown>;
   deleteVpContest: (id: string) => Promise<unknown>;
@@ -132,6 +133,12 @@ export const api = {
   setAutostartEnabled: (enabled: boolean) => bridge().setAutostartEnabled(enabled) as Promise<AppSettings>,
   refreshContests: () => bridge().refreshContests() as Promise<RefreshResult>,
   listTodayContests: () => bridge().listTodayContests() as Promise<ContestReminder[]>,
+  recognizeVpContestLink: (url: string) =>
+    bridge().recognizeVpContestLink(z.string().trim().min(1).parse(url)) as Promise<{
+      url: string;
+      platform: Platform;
+      title: string;
+    }>,
   listVpContests: (filters: { platform?: Platform; status?: VpContestStatus; monthKey?: string; keyword?: string } = {}) =>
     bridge().listVpContests(record(vpFiltersSchema.parse(filters))) as Promise<VpContest[]>,
   createVpContest: (draft: {

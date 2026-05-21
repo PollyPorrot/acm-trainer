@@ -1,4 +1,28 @@
-import type { Platform } from "./types";
+import type { Platform } from "./types.js";
+
+export const platformOptions: Platform[] = [
+  "codeforces",
+  "atcoder",
+  "nowcoder",
+  "qoj",
+  "luogu",
+  "jisuanke",
+  "vjudge",
+  "hdu",
+  "unknown"
+];
+
+export const platformLabels: Record<Platform, string> = {
+  codeforces: "Codeforces",
+  atcoder: "AtCoder",
+  nowcoder: "牛客",
+  qoj: "QOJ",
+  luogu: "洛谷",
+  jisuanke: "计蒜客",
+  vjudge: "VJudge",
+  hdu: "HDU",
+  unknown: "未知"
+};
 
 function parseUrl(value: string) {
   try {

@@ -10,6 +10,7 @@ export interface AcmTrainerBridge {
   refreshContests: () => IpcResult<UnknownRecord>;
   listTodayContests: () => IpcResult<unknown[]>;
   listVpContests: (filters?: UnknownRecord) => IpcResult<unknown[]>;
+  recognizeVpContestLink: (url: string) => IpcResult<UnknownRecord>;
   createVpContest: (draft: UnknownRecord) => IpcResult<UnknownRecord>;
   updateVpContest: (id: string, patch: UnknownRecord) => IpcResult<UnknownRecord>;
   deleteVpContest: (id: string) => IpcResult<UnknownRecord>;
@@ -33,6 +34,7 @@ const acmTrainer: AcmTrainerBridge = {
   refreshContests: () => ipcRenderer.invoke("contests:refresh"),
   listTodayContests: () => ipcRenderer.invoke("contests:listToday"),
   listVpContests: (filters) => ipcRenderer.invoke("vp:list", filters),
+  recognizeVpContestLink: (url) => ipcRenderer.invoke("vp:recognizeLink", url),
   createVpContest: (draft) => ipcRenderer.invoke("vp:create", draft),
   updateVpContest: (id, patch) => ipcRenderer.invoke("vp:update", id, patch),
   deleteVpContest: (id) => ipcRenderer.invoke("vp:delete", id),
