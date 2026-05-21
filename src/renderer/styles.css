@@ -350,6 +350,26 @@ h2 {
   grid-template-columns: minmax(220px, 1fr) 160px 160px 170px;
 }
 
+.image-toolbar {
+  grid-template-columns: minmax(220px, 1fr);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.drop-zone {
+  display: grid;
+  min-height: 74px;
+  place-items: center;
+  margin-bottom: 14px;
+  border: 1px dashed #aeb8c8;
+  border-radius: 8px;
+  background: #f9fbfd;
+  color: #475467;
+  font-weight: 800;
+}
+
 .management-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
@@ -503,6 +523,67 @@ h2 {
 
 .large-textarea {
   min-height: 170px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.image-tile {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #e5eaf2;
+  border-radius: 7px;
+  background: #fbfcfe;
+  cursor: pointer;
+}
+
+.image-tile img,
+.image-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  background: #e8eef6;
+  object-fit: cover;
+}
+
+.image-tile strong,
+.image-tile span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-tile strong {
+  color: #182230;
+}
+
+.image-tile span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.image-tile .icon-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+}
+
+.toggle-row {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 10px;
+  color: #344054;
+  font-weight: 700;
 }
 
 .danger-button {

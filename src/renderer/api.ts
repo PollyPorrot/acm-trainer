@@ -33,7 +33,9 @@ type AcmTrainerBridge = {
   updateReview: (id: string, patch: UnknownRecord) => Promise<unknown>;
   deleteReview: (id: string) => Promise<unknown>;
   listImages: (filters?: UnknownRecord) => Promise<unknown>;
-  importImages: (drafts?: UnknownRecord[]) => Promise<unknown>;
+  getPathForFile: (file: File) => string;
+  importImages: (items?: UnknownRecord[] | string[]) => Promise<unknown>;
+  getImageDataUrl: (id: string) => Promise<unknown>;
   updateImage: (id: string, patch: UnknownRecord) => Promise<unknown>;
   deleteImage: (id: string) => Promise<unknown>;
   openTimer: (alwaysOnTop?: boolean) => Promise<unknown>;
@@ -167,6 +169,7 @@ export const api = {
   deleteReview: (id: string) => bridge().deleteReview(idSchema.parse(id)) as Promise<DeleteResult>,
   listImages: (filters: { tag?: string; allowRandomReminder?: boolean } = {}) =>
     bridge().listImages(record(imageFiltersSchema.parse(filters))) as Promise<ImageWallItem[]>,
+  getPathForFile: (file: File) => bridge().getPathForFile(file),
   importImages: (drafts: Array<{
     title: string;
     originalFileName: string;
@@ -174,6 +177,11 @@ export const api = {
     tags?: string[];
     allowRandomReminder?: boolean;
   }> = []) => bridge().importImages(drafts.map((draft) => record(imageDraftSchema.parse(draft)))) as Promise<ImageWallItem[]>,
+  importImagePaths: (paths: string[]) => bridge().importImages(z.array(z.string().min(1)).parse(paths)) as Promise<ImageWallItem[]>,
+  getImageDataUrl: async (id: string) => {
+    const result = (await bridge().getImageDataUrl(idSchema.parse(id))) as { dataUrl?: string };
+    return result.dataUrl ?? "";
+  },
   updateImage: (id: string, patch: Partial<Omit<ImageWallItem, "id" | "importedAtIso" | "updatedAtIso">>) =>
     bridge().updateImage(idSchema.parse(id), record(imagePatchSchema.parse(patch))) as Promise<ImageWallItem>,
   deleteImage: (id: string) => bridge().deleteImage(idSchema.parse(id)) as Promise<DeleteResult>,

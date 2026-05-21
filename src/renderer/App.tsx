@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Layout, type AppPage } from "./components/Layout";
+import { ImageWallPage } from "./pages/ImageWallPage";
 import { TodayPage } from "./pages/TodayPage";
 import { VpContestPage } from "./pages/VpContestPage";
 import { VpReviewPage } from "./pages/VpReviewPage";
@@ -24,7 +25,7 @@ function renderPage(page: AppPage) {
     case "reviews":
       return <VpReviewPage />;
     case "images":
-      return <PlaceholderPage title="图片墙" />;
+      return <ImageWallPage />;
     case "settings":
       return <PlaceholderPage title="设置" />;
   }

@@ -8,6 +8,7 @@ import {
 import {
   createImageWallItem,
   deleteImageWallItem,
+  getImageWallItem,
   listImageWallItems,
   updateImageWallItem,
   type CreateImageWallItemInput,
@@ -31,6 +32,7 @@ import {
 } from "../data/repositories/vpReviewRepo.js";
 import { getAutostartEnabled, setAutostartEnabled } from "./autostart.js";
 import { refreshContestCache } from "./contestRefresh.js";
+import { deleteStoredImage, importImageFiles, readImageDataUrl } from "./mediaImport.js";
 import { openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
 import { extractLinkMetadata } from "../shared/linkMetadata.js";
 import { detectPlatformFromUrl } from "../shared/platforms.js";
@@ -149,13 +151,30 @@ export function registerIpcHandlers({ windows, db = createDatabase() }: IpcConte
 
   ipcMain.handle("images:list", (_event, filters) => listImageWallItems(db, asRecord(filters)));
   ipcMain.handle("images:import", (_event, items) => {
+    if (Array.isArray(items) && items.every((item) => typeof item === "string")) {
+      return importImageFiles(db, items);
+    }
+
     const drafts = Array.isArray(items) ? items : [];
     return drafts.map((draft) => createImageWallItem(db, asRecord(draft) as CreateImageWallItemInput));
+  });
+  ipcMain.handle("images:dataUrl", (_event, id: unknown) => {
+    const item = getImageWallItem(db, asId(id));
+    return item ? { dataUrl: readImageDataUrl(item.storedPath) } : { dataUrl: "" };
   });
   ipcMain.handle("images:update", (_event, id: unknown, patch) =>
     updateImageWallItem(db, asId(id), asRecord(patch) as UpdateImageWallItemInput)
   );
-  ipcMain.handle("images:delete", (_event, id: unknown) => ({ ok: deleteImageWallItem(db, asId(id)) }));
+  ipcMain.handle("images:delete", (_event, id: unknown) => {
+    const image = getImageWallItem(db, asId(id));
+    const ok = deleteImageWallItem(db, asId(id));
+
+    if (ok && image) {
+      deleteStoredImage(image.storedPath);
+    }
+
+    return { ok };
+  });
 
   ipcMain.handle("timer:open", (_event, alwaysOnTop?: boolean) => {
     openTimerWindow(windows, alwaysOnTop ?? true);

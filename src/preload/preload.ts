@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 
 type IpcResult<T> = Promise<T>;
 type UnknownRecord = Record<string, unknown>;
@@ -19,7 +19,9 @@ export interface AcmTrainerBridge {
   updateReview: (id: string, patch: UnknownRecord) => IpcResult<UnknownRecord>;
   deleteReview: (id: string) => IpcResult<UnknownRecord>;
   listImages: (filters?: UnknownRecord) => IpcResult<unknown[]>;
-  importImages: (drafts?: UnknownRecord[]) => IpcResult<unknown[]>;
+  getPathForFile: (file: File) => string;
+  importImages: (items?: UnknownRecord[] | string[]) => IpcResult<unknown[]>;
+  getImageDataUrl: (id: string) => IpcResult<UnknownRecord>;
   updateImage: (id: string, patch: UnknownRecord) => IpcResult<UnknownRecord>;
   deleteImage: (id: string) => IpcResult<UnknownRecord>;
   openTimer: (alwaysOnTop?: boolean) => IpcResult<UnknownRecord>;
@@ -43,7 +45,9 @@ const acmTrainer: AcmTrainerBridge = {
   updateReview: (id, patch) => ipcRenderer.invoke("reviews:update", id, patch),
   deleteReview: (id) => ipcRenderer.invoke("reviews:delete", id),
   listImages: (filters) => ipcRenderer.invoke("images:list", filters),
-  importImages: (drafts) => ipcRenderer.invoke("images:import", drafts),
+  getPathForFile: (file) => webUtils.getPathForFile(file),
+  importImages: (items) => ipcRenderer.invoke("images:import", items),
+  getImageDataUrl: (id) => ipcRenderer.invoke("images:dataUrl", id),
   updateImage: (id, patch) => ipcRenderer.invoke("images:update", id, patch),
   deleteImage: (id) => ipcRenderer.invoke("images:delete", id),
   openTimer: (alwaysOnTop) => ipcRenderer.invoke("timer:open", alwaysOnTop),
