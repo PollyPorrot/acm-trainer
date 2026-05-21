@@ -1,23 +1,39 @@
-const navItems = ["Today", "Contest Reminders", "VP Contests", "Reviews", "Image Wall", "Settings"];
+import { useState } from "react";
+import { Layout, type AppPage } from "./components/Layout";
+import { TodayPage } from "./pages/TodayPage";
+
+function PlaceholderPage({ title }: { title: string }) {
+  return (
+    <section className="placeholder-page" aria-labelledby="page-title">
+      <p className="eyebrow">ACM Trainer</p>
+      <h1 id="page-title">{title}</h1>
+    </section>
+  );
+}
+
+function renderPage(page: AppPage) {
+  switch (page) {
+    case "today":
+      return <TodayPage />;
+    case "contests":
+      return <PlaceholderPage title="比赛提醒" />;
+    case "vp":
+      return <PlaceholderPage title="VP 比赛" />;
+    case "reviews":
+      return <PlaceholderPage title="复盘" />;
+    case "images":
+      return <PlaceholderPage title="图片墙" />;
+    case "settings":
+      return <PlaceholderPage title="设置" />;
+  }
+}
 
 export function App() {
+  const [activePage, setActivePage] = useState<AppPage>("today");
+
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">ACM Trainer</div>
-        <nav className="nav-list" aria-label="Primary navigation">
-          {navItems.map((item) => (
-            <button className="nav-item" type="button" key={item}>
-              {item}
-            </button>
-          ))}
-        </nav>
-      </aside>
-      <section className="content-area" aria-labelledby="page-title">
-        <p className="eyebrow">Desktop training assistant</p>
-        <h1 id="page-title">ACM Trainer</h1>
-        <p className="placeholder">Project scaffold ready for the app modules.</p>
-      </section>
-    </main>
+    <Layout activePage={activePage} onNavigate={setActivePage}>
+      {renderPage(activePage)}
+    </Layout>
   );
 }
