@@ -40,6 +40,7 @@ type AcmTrainerBridge = {
   deleteImage: (id: string) => Promise<unknown>;
   openTimer: (alwaysOnTop?: boolean) => Promise<unknown>;
   setTimerAlwaysOnTop: (enabled: boolean) => Promise<unknown>;
+  notifyTimerComplete: () => Promise<unknown>;
   showTodayReminder: () => Promise<unknown>;
 };
 
@@ -187,6 +188,7 @@ export const api = {
   deleteImage: (id: string) => bridge().deleteImage(idSchema.parse(id)) as Promise<DeleteResult>,
   openTimer: (alwaysOnTop = true) => bridge().openTimer(alwaysOnTop) as Promise<DeleteResult>,
   setTimerAlwaysOnTop: (enabled: boolean) => bridge().setTimerAlwaysOnTop(enabled) as Promise<DeleteResult>,
+  notifyTimerComplete: () => bridge().notifyTimerComplete() as Promise<DeleteResult>,
   showTodayReminder: () => bridge().showTodayReminder() as Promise<DeleteResult>
 };
 

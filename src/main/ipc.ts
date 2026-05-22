@@ -33,7 +33,7 @@ import {
 import { getAutostartEnabled, setAutostartEnabled } from "./autostart.js";
 import { refreshContestCache } from "./contestRefresh.js";
 import { deleteStoredImage, importImageFiles, readImageDataUrl } from "./mediaImport.js";
-import { openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
+import { notifyTimerComplete, openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
 import { extractLinkMetadata } from "../shared/linkMetadata.js";
 import { detectPlatformFromUrl } from "../shared/platforms.js";
 import type { AppSettings } from "../shared/types.js";
@@ -183,6 +183,10 @@ export function registerIpcHandlers({ windows, db = createDatabase(), showTodayR
   });
   ipcMain.handle("timer:setAlwaysOnTop", (_event, enabled: boolean) => {
     setTimerAlwaysOnTop(windows, Boolean(enabled));
+    return { ok: true };
+  });
+  ipcMain.handle("timer:notifyComplete", () => {
+    notifyTimerComplete();
     return { ok: true };
   });
 

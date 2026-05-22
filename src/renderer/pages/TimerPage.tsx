@@ -61,6 +61,18 @@ export function TimerPage() {
     }
   }, [snapshot.isAlwaysOnTop]);
 
+  useEffect(() => {
+    if (!snapshot.completedAtIso) {
+      return;
+    }
+
+    try {
+      void api.notifyTimerComplete().catch(() => undefined);
+    } catch {
+      // The timer page can be rendered by Vite without Electron during development.
+    }
+  }, [snapshot.completedAtIso]);
+
   const displayValue = useMemo(() => formatTimerSeconds(displaySeconds(snapshot)), [snapshot]);
   const isCompleted = snapshot.mode === "countdown" && Boolean(snapshot.completedAtIso);
 

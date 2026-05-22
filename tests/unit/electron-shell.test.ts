@@ -54,5 +54,6 @@ describe("Electron shell scaffold", () => {
     expect(preload).toContain("listImages");
     expect(preload).toContain("openTimer");
     expect(preload).toContain("showTodayReminder");
+    expect(preload).toContain("notifyTimerComplete");
   });
 });

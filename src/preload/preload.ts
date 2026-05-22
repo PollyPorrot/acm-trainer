@@ -26,6 +26,7 @@ export interface AcmTrainerBridge {
   deleteImage: (id: string) => IpcResult<UnknownRecord>;
   openTimer: (alwaysOnTop?: boolean) => IpcResult<UnknownRecord>;
   setTimerAlwaysOnTop: (enabled: boolean) => IpcResult<UnknownRecord>;
+  notifyTimerComplete: () => IpcResult<UnknownRecord>;
   showTodayReminder: () => IpcResult<UnknownRecord>;
 }
 
@@ -52,6 +53,7 @@ const acmTrainer: AcmTrainerBridge = {
   deleteImage: (id) => ipcRenderer.invoke("images:delete", id),
   openTimer: (alwaysOnTop) => ipcRenderer.invoke("timer:open", alwaysOnTop),
   setTimerAlwaysOnTop: (enabled) => ipcRenderer.invoke("timer:setAlwaysOnTop", enabled),
+  notifyTimerComplete: () => ipcRenderer.invoke("timer:notifyComplete"),
   showTodayReminder: () => ipcRenderer.invoke("reminder:showToday")
 };
 
