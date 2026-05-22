@@ -24,6 +24,14 @@ body {
   background: #f5f7fa;
 }
 
+.timer-window-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 18px;
+  background: #101828;
+}
+
 button {
   font: inherit;
 }
@@ -155,6 +163,12 @@ h2 {
   width: 40px;
   height: 40px;
   padding: 0;
+}
+
+.icon-button[data-active="true"] {
+  color: #0f766e;
+  border-color: #9bd8cf;
+  background: #e8f8f5;
 }
 
 .metric-grid {
@@ -332,6 +346,110 @@ h2 {
   padding: 12px;
   border-color: #cddbe9;
   background: #f3f7fb;
+}
+
+.timer-card {
+  display: grid;
+  width: min(100%, 320px);
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #263247;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 22px 54px rgb(0 0 0 / 26%);
+}
+
+.timer-mode-tabs,
+.timer-controls,
+.preset-row {
+  display: flex;
+  align-items: center;
+}
+
+.timer-mode-tabs {
+  gap: 6px;
+  padding: 4px;
+  border-radius: 7px;
+  background: #edf2f7;
+}
+
+.timer-mode-tabs button,
+.preset-row button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #344054;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.timer-mode-tabs button {
+  flex: 1;
+}
+
+.timer-mode-tabs button[data-active="true"],
+.preset-row button:hover {
+  color: #101828;
+  background: #ffffff;
+}
+
+.timer-display {
+  display: block;
+  color: #101828;
+  font-family: "Segoe UI Mono", "Roboto Mono", Consolas, monospace;
+  font-size: 44px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+}
+
+.timer-status {
+  margin: -4px 0 0;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+.countdown-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.countdown-editor label {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.countdown-editor input {
+  min-height: 38px;
+  min-width: 0;
+  border: 1px solid #d7dde7;
+  border-radius: 7px;
+  padding: 0 10px;
+  color: #172033;
+  font: inherit;
+}
+
+.preset-row {
+  gap: 8px;
+}
+
+.preset-row button {
+  flex: 1;
+  background: #f5f7fb;
+}
+
+.timer-controls {
+  justify-content: center;
+  gap: 8px;
 }
 
 .placeholder-page {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Layout, type AppPage } from "./components/Layout";
 import { ImageWallPage } from "./pages/ImageWallPage";
+import { TimerPage } from "./pages/TimerPage";
 import { TodayPage } from "./pages/TodayPage";
 import { VpContestPage } from "./pages/VpContestPage";
 import { VpReviewPage } from "./pages/VpReviewPage";
@@ -32,7 +33,9 @@ function renderPage(page: AppPage) {
 }
 
 export function App() {
-  const isReminderRoute = window.location.hash === "#/reminder";
+  const route = window.location.hash;
+  const isReminderRoute = route === "#/reminder";
+  const isTimerRoute = route === "#/timer";
   const [activePage, setActivePage] = useState<AppPage>("today");
 
   if (isReminderRoute) {
@@ -45,6 +48,10 @@ export function App() {
         }}
       />
     );
+  }
+
+  if (isTimerRoute) {
+    return <TimerPage />;
   }
 
   return (
