@@ -63,9 +63,19 @@ function sortUpcomingVp(contests: VpContest[]): VpContest[] {
     .slice(0, 5);
 }
 
-export function TodayPage() {
+type TodayPageProps = {
+  initialReminderOpen?: boolean;
+  compactReminder?: boolean;
+  onReminderClose?: () => void;
+};
+
+export function TodayPage({
+  initialReminderOpen = false,
+  compactReminder = false,
+  onReminderClose
+}: TodayPageProps = {}) {
   const [state, setState] = useState<TodayState>(initialState);
-  const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(initialReminderOpen);
 
   async function loadTodayData() {
     setState((current) => ({ ...current, isLoading: true, error: null }));
@@ -117,6 +127,22 @@ export function TodayPage() {
   const upcomingVp = useMemo(() => sortUpcomingVp(state.vpContests), [state.vpContests]);
   const dailyImage = useMemo(() => pickDailyImage(state.images), [state.images]);
   const fetchedAt = latestFetchedAt(state.contests);
+  const closeReminder = () => {
+    setIsReminderOpen(false);
+    onReminderClose?.();
+  };
+
+  if (compactReminder) {
+    return (
+      <div className="reminder-window-page">
+        {state.error ? <p className="status-line">{state.error}</p> : null}
+        {state.isLoading ? <p className="status-line">加载中...</p> : null}
+        {!state.isLoading && !state.error && isReminderOpen ? (
+          <ReminderModal contests={state.contests} image={dailyImage} onClose={closeReminder} />
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="today-page">
@@ -224,7 +250,7 @@ export function TodayPage() {
       </div>
 
       {isReminderOpen ? (
-        <ReminderModal contests={state.contests} image={dailyImage} onClose={() => setIsReminderOpen(false)} />
+        <ReminderModal contests={state.contests} image={dailyImage} onClose={closeReminder} />
       ) : null}
     </div>
   );

@@ -4,12 +4,14 @@ import type { WindowManager } from "./windows.js";
 export interface TrayContext {
   windows: WindowManager;
   quit: () => void;
+  refreshContests?: () => void;
+  showTodayReminder?: () => void;
 }
 
 const iconDataUrl =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAI0lEQVR4AWP4//8/AyWYYXAZAAkxKjDqgqMGjBqgAqMGAG92AxH7pKuzAAAAAElFTkSuQmCC";
 
-export function createAppTray({ windows, quit }: TrayContext): Tray {
+export function createAppTray({ windows, quit, refreshContests, showTodayReminder }: TrayContext): Tray {
   const tray = new Tray(nativeImage.createFromDataURL(iconDataUrl));
 
   const menu = Menu.buildFromTemplate([
@@ -24,12 +26,19 @@ export function createAppTray({ windows, quit }: TrayContext): Tray {
     {
       label: "Refresh Contests",
       click: () => {
-        windows.getMainWindow()?.webContents.send("contests:refreshRequested");
+        refreshContests?.();
       }
     },
     {
       label: "Today Reminder",
-      click: () => windows.showReminderWindow()
+      click: () => {
+        if (showTodayReminder) {
+          showTodayReminder();
+          return;
+        }
+
+        windows.showReminderWindow();
+      }
     },
     { type: "separator" },
     {

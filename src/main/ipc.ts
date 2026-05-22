@@ -42,6 +42,7 @@ import type { WindowManager } from "./windows.js";
 export interface IpcContext {
   windows: WindowManager;
   db?: AppDatabase;
+  showTodayReminder?: () => Promise<unknown> | unknown;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -102,7 +103,7 @@ function readSettings(db: AppDatabase): AppSettings {
   };
 }
 
-export function registerIpcHandlers({ windows, db = createDatabase() }: IpcContext): void {
+export function registerIpcHandlers({ windows, db = createDatabase(), showTodayReminder }: IpcContext): void {
   app.once("quit", () => {
     db.close();
   });
@@ -185,8 +186,13 @@ export function registerIpcHandlers({ windows, db = createDatabase() }: IpcConte
     return { ok: true };
   });
 
-  ipcMain.handle("reminder:showToday", () => {
-    windows.showReminderWindow();
+  ipcMain.handle("reminder:showToday", async () => {
+    if (showTodayReminder) {
+      await showTodayReminder();
+    } else {
+      windows.showReminderWindow();
+    }
+
     return { ok: true };
   });
 }

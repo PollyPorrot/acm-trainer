@@ -32,7 +32,20 @@ function renderPage(page: AppPage) {
 }
 
 export function App() {
+  const isReminderRoute = window.location.hash === "#/reminder";
   const [activePage, setActivePage] = useState<AppPage>("today");
+
+  if (isReminderRoute) {
+    return (
+      <TodayPage
+        compactReminder
+        initialReminderOpen
+        onReminderClose={() => {
+          window.close();
+        }}
+      />
+    );
+  }
 
   return (
     <Layout activePage={activePage} onNavigate={setActivePage}>
