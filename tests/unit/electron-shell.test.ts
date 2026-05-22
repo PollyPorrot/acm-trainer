@@ -13,6 +13,7 @@ describe("Electron shell scaffold", () => {
     const pkg = JSON.parse(readProjectFile("package.json")) as {
       main: string;
       scripts: Record<string, string>;
+      build: { asar?: boolean };
     };
 
     expect(pkg.main).toBe("dist-electron/main/main.js");
@@ -23,9 +24,11 @@ describe("Electron shell scaffold", () => {
     );
     expect(pkg.scripts.test).toContain("npm run rebuild:node");
     expect(pkg.scripts.start).toContain("npm run rebuild:electron");
+    expect(pkg.scripts.package).toContain("npm run rebuild:electron");
     expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.node.json");
     expect(pkg.scripts["build:main"]).toContain("tsc -p tsconfig.preload.json");
     expect(pkg.scripts["build:main"]).toContain("dist-electron/preload/preload.cjs");
+    expect(pkg.build.asar).toBe(false);
   });
 
   test("main and preload entry points exist", () => {
@@ -40,6 +43,12 @@ describe("Electron shell scaffold", () => {
     ].forEach((path) => {
       expect(existsSync(join(root, path)), `${path} should exist`).toBe(true);
     });
+  });
+
+  test("Vite uses relative asset paths for packaged file URLs", () => {
+    const viteConfig = readProjectFile("vite.config.ts");
+
+    expect(viteConfig).toContain('base: "./"');
   });
 
   test("preload exposes the typed ACM Trainer bridge", () => {
