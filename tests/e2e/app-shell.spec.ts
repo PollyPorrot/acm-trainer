@@ -26,6 +26,15 @@ test("Electron app shell opens the ACM Trainer renderer", async () => {
     await page.locator(".nav-item").nth(1).click();
     await expect(page.locator(".contest-group-list")).toBeVisible();
 
+    await page.locator(".nav-item").nth(2).click();
+    await expect(page.locator(".management-grid form")).toBeVisible();
+
+    await page.locator(".nav-item").nth(3).click();
+    await expect(page.locator(".review-toolbar")).toBeVisible();
+
+    await page.locator(".nav-item").nth(4).click();
+    await expect(page.locator(".drop-zone")).toBeVisible();
+
     await page.locator(".nav-item").nth(5).click();
     await expect(page.locator(".settings-grid")).toBeVisible();
 

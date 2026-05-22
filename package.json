@@ -17,6 +17,26 @@
     "start": "npm run build:main && npm run rebuild:electron && electron .",
     "package": "electron-builder"
   },
+  "build": {
+    "appId": "local.acm-trainer",
+    "productName": "ACM Trainer",
+    "directories": {
+      "output": "dist-packaged"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    }
+  },
   "dependencies": {
     "better-sqlite3": "^12.4.1",
     "cheerio": "^1.1.2",
