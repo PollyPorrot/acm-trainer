@@ -452,6 +452,64 @@ h2 {
   gap: 8px;
 }
 
+.contest-group-list,
+.settings-grid,
+.settings-list {
+  display: grid;
+  gap: 14px;
+}
+
+.link-button {
+  flex: 0 0 auto;
+  text-decoration: none;
+}
+
+.settings-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.setting-row {
+  display: flex;
+  min-width: 0;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5eaf2;
+  border-radius: 7px;
+  background: #fbfcfe;
+}
+
+.setting-row input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.setting-row span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.setting-row strong,
+.setting-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.setting-row strong {
+  color: #182230;
+}
+
+.setting-row small {
+  color: #667085;
+  font-size: 13px;
+}
+
+.data-row {
+  display: block;
+}
+
 .placeholder-page {
   display: grid;
   min-height: calc(100vh - 60px);
@@ -734,7 +792,8 @@ h2 {
   .metric-grid,
   .dashboard-grid,
   .toolbar-panel,
-  .management-grid {
+  .management-grid,
+  .settings-grid {
     grid-template-columns: 1fr;
   }
 

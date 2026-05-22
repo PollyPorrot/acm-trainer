@@ -49,11 +49,13 @@ describe("Electron shell scaffold", () => {
     expect(preload).toContain("acmTrainer");
     expect(preload).toContain("getSettings");
     expect(preload).toContain("refreshContests");
+    expect(preload).toContain("listCachedContests");
     expect(preload).toContain("listVpContests");
     expect(preload).toContain("listReviews");
     expect(preload).toContain("listImages");
     expect(preload).toContain("openTimer");
     expect(preload).toContain("showTodayReminder");
     expect(preload).toContain("notifyTimerComplete");
+    expect(preload).toContain("quitApp");
   });
 });

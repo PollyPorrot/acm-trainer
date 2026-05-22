@@ -23,6 +23,12 @@ test("Electron app shell opens the ACM Trainer renderer", async () => {
       .poll(() => page.evaluate(() => typeof window.acmTrainer?.getSettings))
       .toBe("function");
 
+    await page.locator(".nav-item").nth(1).click();
+    await expect(page.locator(".contest-group-list")).toBeVisible();
+
+    await page.locator(".nav-item").nth(5).click();
+    await expect(page.locator(".settings-grid")).toBeVisible();
+
     const reminderWindowPromise = app.waitForEvent("window");
     await page.evaluate(() => window.acmTrainer?.showTodayReminder());
     const reminderPage = await reminderWindowPromise;

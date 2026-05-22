@@ -22,6 +22,7 @@ type AcmTrainerBridge = {
   updateSettings: (patch: UnknownRecord) => Promise<unknown>;
   setAutostartEnabled: (enabled: boolean) => Promise<unknown>;
   refreshContests: () => Promise<unknown>;
+  listCachedContests: () => Promise<unknown>;
   listTodayContests: () => Promise<unknown>;
   listVpContests: (filters?: UnknownRecord) => Promise<unknown>;
   recognizeVpContestLink: (url: string) => Promise<unknown>;
@@ -42,6 +43,7 @@ type AcmTrainerBridge = {
   setTimerAlwaysOnTop: (enabled: boolean) => Promise<unknown>;
   notifyTimerComplete: () => Promise<unknown>;
   showTodayReminder: () => Promise<unknown>;
+  quitApp: () => Promise<unknown>;
 };
 
 const platformSchema = z.enum([
@@ -136,6 +138,7 @@ export const api = {
     bridge().updateSettings(record(settingsPatchSchema.parse(patch))) as Promise<AppSettings>,
   setAutostartEnabled: (enabled: boolean) => bridge().setAutostartEnabled(enabled) as Promise<AppSettings>,
   refreshContests: () => bridge().refreshContests() as Promise<RefreshResult>,
+  listCachedContests: () => bridge().listCachedContests() as Promise<ContestReminder[]>,
   listTodayContests: () => bridge().listTodayContests() as Promise<ContestReminder[]>,
   recognizeVpContestLink: (url: string) =>
     bridge().recognizeVpContestLink(z.string().trim().min(1).parse(url)) as Promise<{
@@ -189,7 +192,8 @@ export const api = {
   openTimer: (alwaysOnTop = true) => bridge().openTimer(alwaysOnTop) as Promise<DeleteResult>,
   setTimerAlwaysOnTop: (enabled: boolean) => bridge().setTimerAlwaysOnTop(enabled) as Promise<DeleteResult>,
   notifyTimerComplete: () => bridge().notifyTimerComplete() as Promise<DeleteResult>,
-  showTodayReminder: () => bridge().showTodayReminder() as Promise<DeleteResult>
+  showTodayReminder: () => bridge().showTodayReminder() as Promise<DeleteResult>,
+  quitApp: () => bridge().quitApp() as Promise<DeleteResult>
 };
 
 declare global {

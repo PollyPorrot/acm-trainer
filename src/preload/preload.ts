@@ -8,6 +8,7 @@ export interface AcmTrainerBridge {
   updateSettings: (patch: UnknownRecord) => IpcResult<UnknownRecord>;
   setAutostartEnabled: (enabled: boolean) => IpcResult<UnknownRecord>;
   refreshContests: () => IpcResult<UnknownRecord>;
+  listCachedContests: () => IpcResult<unknown[]>;
   listTodayContests: () => IpcResult<unknown[]>;
   listVpContests: (filters?: UnknownRecord) => IpcResult<unknown[]>;
   recognizeVpContestLink: (url: string) => IpcResult<UnknownRecord>;
@@ -28,6 +29,7 @@ export interface AcmTrainerBridge {
   setTimerAlwaysOnTop: (enabled: boolean) => IpcResult<UnknownRecord>;
   notifyTimerComplete: () => IpcResult<UnknownRecord>;
   showTodayReminder: () => IpcResult<UnknownRecord>;
+  quitApp: () => IpcResult<UnknownRecord>;
 }
 
 const acmTrainer: AcmTrainerBridge = {
@@ -35,6 +37,7 @@ const acmTrainer: AcmTrainerBridge = {
   updateSettings: (patch) => ipcRenderer.invoke("settings:update", patch),
   setAutostartEnabled: (enabled) => ipcRenderer.invoke("settings:setAutostart", enabled),
   refreshContests: () => ipcRenderer.invoke("contests:refresh"),
+  listCachedContests: () => ipcRenderer.invoke("contests:listCached"),
   listTodayContests: () => ipcRenderer.invoke("contests:listToday"),
   listVpContests: (filters) => ipcRenderer.invoke("vp:list", filters),
   recognizeVpContestLink: (url) => ipcRenderer.invoke("vp:recognizeLink", url),
@@ -54,7 +57,8 @@ const acmTrainer: AcmTrainerBridge = {
   openTimer: (alwaysOnTop) => ipcRenderer.invoke("timer:open", alwaysOnTop),
   setTimerAlwaysOnTop: (enabled) => ipcRenderer.invoke("timer:setAlwaysOnTop", enabled),
   notifyTimerComplete: () => ipcRenderer.invoke("timer:notifyComplete"),
-  showTodayReminder: () => ipcRenderer.invoke("reminder:showToday")
+  showTodayReminder: () => ipcRenderer.invoke("reminder:showToday"),
+  quitApp: () => ipcRenderer.invoke("app:quit")
 };
 
 contextBridge.exposeInMainWorld("acmTrainer", acmTrainer);

@@ -1,26 +1,19 @@
 import { useState } from "react";
 import { Layout, type AppPage } from "./components/Layout";
+import { ContestReminderPage } from "./pages/ContestReminderPage";
 import { ImageWallPage } from "./pages/ImageWallPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { TimerPage } from "./pages/TimerPage";
 import { TodayPage } from "./pages/TodayPage";
 import { VpContestPage } from "./pages/VpContestPage";
 import { VpReviewPage } from "./pages/VpReviewPage";
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <section className="placeholder-page" aria-labelledby="page-title">
-      <p className="eyebrow">ACM Trainer</p>
-      <h1 id="page-title">{title}</h1>
-    </section>
-  );
-}
 
 function renderPage(page: AppPage) {
   switch (page) {
     case "today":
       return <TodayPage />;
     case "contests":
-      return <PlaceholderPage title="比赛提醒" />;
+      return <ContestReminderPage />;
     case "vp":
       return <VpContestPage />;
     case "reviews":
@@ -28,7 +21,7 @@ function renderPage(page: AppPage) {
     case "images":
       return <ImageWallPage />;
     case "settings":
-      return <PlaceholderPage title="设置" />;
+      return <SettingsPage />;
   }
 }
 

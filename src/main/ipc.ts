@@ -133,6 +133,7 @@ export function registerIpcHandlers({ windows, db = createDatabase(), showTodayR
   });
 
   ipcMain.handle("contests:refresh", () => refreshContestCache(db));
+  ipcMain.handle("contests:listCached", () => listContestCache(db));
   ipcMain.handle("contests:listToday", () => listContestCache(db, localDayRange()));
 
   ipcMain.handle("vp:list", (_event, filters) => listVpContests(db, asRecord(filters)));
@@ -197,6 +198,11 @@ export function registerIpcHandlers({ windows, db = createDatabase(), showTodayR
       windows.showReminderWindow();
     }
 
+    return { ok: true };
+  });
+
+  ipcMain.handle("app:quit", () => {
+    app.quit();
     return { ok: true };
   });
 }
