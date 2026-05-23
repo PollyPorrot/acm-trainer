@@ -67,4 +67,11 @@ describe("Electron shell scaffold", () => {
     expect(preload).toContain("notifyTimerComplete");
     expect(preload).toContain("quitApp");
   });
+
+  test("main process points Electron user data at the portable data directory", () => {
+    const main = readProjectFile("src/main/main.ts");
+
+    expect(main).toContain("resolveAppDataDirectory");
+    expect(main).toContain('app.setPath("userData"');
+  });
 });

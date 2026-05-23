@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { initializeSchema } from "./schema.js";
+import { resolveAppDataDirectory } from "./appDataPath.js";
 
 const require = createRequire(import.meta.url);
 const BetterSqlite3 = require("better-sqlite3");
@@ -26,15 +27,6 @@ export type CreateDatabaseOptions = {
   path?: string;
 };
 
-function getElectronUserDataPath(): string | null {
-  try {
-    const electron = require("electron") as { app?: { getPath(name: "userData"): string } };
-    return electron.app?.getPath("userData") ?? null;
-  } catch {
-    return null;
-  }
-}
-
 function ensureDirectoryForDatabase(databasePath: string): void {
   if (databasePath === ":memory:") {
     return;
@@ -52,6 +44,13 @@ export function resolveDatabasePath(options: CreateDatabaseOptions = {}): string
     return options.path;
   }
 
+  if (options.appDataPath) {
+    return path.join(
+      resolveAppDataDirectory({ appDataPath: options.appDataPath }),
+      "acm-trainer.sqlite"
+    );
+  }
+
   if (process.env.VITEST || process.env.NODE_ENV === "test") {
     return path.join(
       os.tmpdir(),
@@ -60,11 +59,7 @@ export function resolveDatabasePath(options: CreateDatabaseOptions = {}): string
     );
   }
 
-  const appDataPath =
-    options.appDataPath ??
-    process.env.ACM_TRAINER_DATA_DIR ??
-    getElectronUserDataPath() ??
-    path.join(process.env.APPDATA ?? os.homedir(), "ACM Trainer");
+  const appDataPath = resolveAppDataDirectory();
 
   return path.join(appDataPath, "acm-trainer.sqlite");
 }

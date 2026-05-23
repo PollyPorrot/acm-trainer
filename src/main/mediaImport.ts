@@ -1,13 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { app } from "electron";
 import { createImageWallItem, type CreateImageWallItemInput } from "../data/repositories/imageWallRepo.js";
+import { resolveAppDataDirectory } from "../data/appDataPath.js";
 import type { AppDatabase } from "../data/db.js";
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"]);
 
-function mediaDirectory(appDataPath = app.getPath("userData")): string {
+function mediaDirectory(appDataPath = resolveAppDataDirectory()): string {
   return path.join(appDataPath, "media", "images");
 }
 

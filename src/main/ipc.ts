@@ -1,5 +1,6 @@
 import { app, ipcMain } from "electron";
 import { createDatabase, type AppDatabase } from "../data/db.js";
+import { resolveAppDataDirectory } from "../data/appDataPath.js";
 import { listContestCache } from "../data/repositories/contestCacheRepo.js";
 import {
   getAppSettings,
@@ -99,7 +100,7 @@ function readSettings(db: AppDatabase): AppSettings {
   return {
     ...getAppSettings(db),
     launchAtStartup: getAutostartEnabled(),
-    dataDirectory: app.getPath("userData")
+    dataDirectory: resolveAppDataDirectory()
   };
 }
 
@@ -120,7 +121,7 @@ export function registerIpcHandlers({ windows, db = createDatabase(), showTodayR
     updateAppSettings(db, {
       ...settingsPatch,
       launchAtStartup: getAutostartEnabled(),
-      dataDirectory: app.getPath("userData")
+      dataDirectory: resolveAppDataDirectory()
     });
 
     return readSettings(db);

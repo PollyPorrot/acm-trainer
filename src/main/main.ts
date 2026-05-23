@@ -1,5 +1,7 @@
 import { app, BrowserWindow, Tray } from "electron";
+import fs from "node:fs";
 import { createDatabase } from "../data/db.js";
+import { resolveAppDataDirectory } from "../data/appDataPath.js";
 import { refreshContestCache } from "./contestRefresh.js";
 import { createWindowManager } from "./windows.js";
 import { createAppTray } from "./tray.js";
@@ -13,6 +15,13 @@ const appState = {
 let tray: Tray | null = null;
 const windows = createWindowManager(appState);
 
+function configurePortableUserData(): void {
+  const appDataDirectory = resolveAppDataDirectory({ isPackaged: app.isPackaged });
+
+  fs.mkdirSync(appDataDirectory, { recursive: true });
+  app.setPath("userData", appDataDirectory);
+}
+
 function logStartupError(error: unknown): void {
   console.error(error instanceof Error ? error.stack : error);
 }
@@ -23,6 +32,8 @@ function quitApplication(): void {
 
 process.on("uncaughtException", logStartupError);
 process.on("unhandledRejection", logStartupError);
+
+configurePortableUserData();
 
 app.on("before-quit", quitApplication);
 
