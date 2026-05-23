@@ -1,7 +1,21 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { _electron as electron, expect, test } from "@playwright/test";
+import { _electron as electron, expect, test, type Page } from "@playwright/test";
+
+async function hasDocumentOverflow(page: Page) {
+  return page.evaluate(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollWidth = Math.max(root.scrollWidth, body.scrollWidth);
+    const scrollHeight = Math.max(root.scrollHeight, body.scrollHeight);
+
+    return {
+      horizontal: scrollWidth > window.innerWidth + 1,
+      vertical: scrollHeight > window.innerHeight + 1
+    };
+  });
+}
 
 test("Electron app shell opens the ACM Trainer renderer", async () => {
   const dataDir = mkdtempSync(join(tmpdir(), "acm-trainer-e2e-"));
@@ -49,6 +63,16 @@ test("Electron app shell opens the ACM Trainer renderer", async () => {
     const timerPage = await timerWindowPromise;
     await expect(timerPage.locator("[data-testid='timer-display']")).toHaveText("00:00:00");
     await expect(timerPage.locator("[data-testid='timer-start']")).toBeVisible();
+    await expect.poll(() => hasDocumentOverflow(timerPage)).toEqual({
+      horizontal: false,
+      vertical: false
+    });
+
+    await timerPage.locator(".timer-mode-tabs button").nth(1).click();
+    await expect.poll(() => hasDocumentOverflow(timerPage)).toEqual({
+      horizontal: false,
+      vertical: false
+    });
     await timerPage.close();
   } finally {
     await app.close();

@@ -6,6 +6,12 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const preloadPath = join(currentDir, "../preload/preload.cjs");
 const devServerUrl = "http://127.0.0.1:5173";
 const allowedExternalProtocols = new Set(["https:", "http:", "mailto:"]);
+const timerWindowBounds = {
+  width: 380,
+  height: 400,
+  minWidth: 380,
+  minHeight: 400
+};
 
 export type ManagedWindow = "main" | "reminder" | "timer";
 
@@ -180,11 +186,9 @@ export function createWindowManager(state: WindowManagerState): WindowManager {
     }
 
     timerWindow = createBaseWindow({
-      width: 360,
-      height: 260,
-      minWidth: 320,
-      minHeight: 220,
+      ...timerWindowBounds,
       alwaysOnTop: Boolean(options.alwaysOnTop),
+      autoHideMenuBar: true,
       title: "ACM Trainer Timer"
     });
 
