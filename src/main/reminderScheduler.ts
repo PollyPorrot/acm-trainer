@@ -48,12 +48,11 @@ function formatLocalDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function localDayRange(date: Date): { fromIso: string; toIso: string } {
-  const from = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+function localUpcomingDayRange(date: Date): { fromIso: string; toIso: string } {
   const to = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0);
 
   return {
-    fromIso: from.toISOString(),
+    fromIso: date.toISOString(),
     toIso: to.toISOString()
   };
 }
@@ -143,7 +142,7 @@ export async function runDailyReminder(
   }
 
   const contests = settings.contestRemindersEnabled
-    ? listContestCache(context.db, localDayRange(now)).map(toContestReminder)
+    ? listContestCache(context.db, localUpcomingDayRange(now)).map(toContestReminder)
     : [];
   const image = settings.imageRandomReminderEnabled
     ? pickDailyImage(listImageWallItems(context.db, { allowRandomReminder: true }), localDateKey)

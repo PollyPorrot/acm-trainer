@@ -60,12 +60,11 @@ function asId(value: unknown): string {
   throw new Error("Expected record id");
 }
 
-function localDayRange(now = new Date()): { fromIso: string; toIso: string } {
-  const from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+function localUpcomingDayRange(now = new Date()): { fromIso: string; toIso: string } {
   const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
 
   return {
-    fromIso: from.toISOString(),
+    fromIso: now.toISOString(),
     toIso: to.toISOString()
   };
 }
@@ -134,8 +133,8 @@ export function registerIpcHandlers({ windows, db = createDatabase(), showTodayR
   });
 
   ipcMain.handle("contests:refresh", () => refreshContestCache(db));
-  ipcMain.handle("contests:listCached", () => listContestCache(db));
-  ipcMain.handle("contests:listToday", () => listContestCache(db, localDayRange()));
+  ipcMain.handle("contests:listCached", () => listContestCache(db, { fromIso: new Date().toISOString() }));
+  ipcMain.handle("contests:listToday", () => listContestCache(db, localUpcomingDayRange()));
 
   ipcMain.handle("vp:list", (_event, filters) => listVpContests(db, asRecord(filters)));
   ipcMain.handle("vp:recognizeLink", (_event, url: unknown) => recognizeContestLink(url));

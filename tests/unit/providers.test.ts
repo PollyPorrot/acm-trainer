@@ -117,13 +117,57 @@ describe("contest providers", () => {
           <span>2026-05-25 19:00</span>
         </article>
       </main>
-    `));
+    `), undefined, new Date("2026-05-21T00:00:00.000Z"));
 
     expect(contests.map((contest) => contest.id)).toEqual([
       "nowcoder:111",
       "nowcoder:222",
       "nowcoder:333"
     ]);
+  });
+
+  test("uses Nowcoder contest time instead of signup time", async () => {
+    const startTime = Date.UTC(2099, 4, 24, 11, 0, 0);
+    const endTime = Date.UTC(2099, 4, 24, 13, 0, 0);
+    const contests = await fetchNowcoderContests(responseFetch(`
+      <div class="platform-item" data-json='{"contestDuration":7200000,"contestEndTime":${endTime},"contestId":134981,"contestName":"\u725b\u5ba2\u5468\u8d5b Round 145","contestStartTime":${startTime}}'>
+        <h4><a href="/acm/contest/134981">\u725b\u5ba2\u5468\u8d5b Round 145</a></h4>
+        <ul>
+          <li>\u62a5\u540d\u65f6\u95f4\uff1a 2099-05-09 10:00 \u81f3 2099-05-24 21:00</li>
+          <li>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 19:00 \u81f3 2099-05-24 21:00 (\u65f6\u957f:2\u5c0f\u65f6)</li>
+        </ul>
+      </div>
+    `), ["https://example.invalid/nowcoder"], new Date("2099-05-24T09:00:00.000Z"));
+
+    expect(contests).toEqual([
+      expect.objectContaining({
+        id: "nowcoder:134981",
+        startTimeIso: "2099-05-24T11:00:00.000Z",
+        endTimeIso: "2099-05-24T13:00:00.000Z",
+        durationSeconds: 7200
+      })
+    ]);
+  });
+
+  test("skips Nowcoder contests that already started", async () => {
+    const contests = await fetchNowcoderContests(responseFetch(`
+      <main>
+        <article>
+          <a href="/acm/contest/111">\u725b\u5ba2\u5468\u8d5b Round 111</a>
+          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 18:00 \u81f3 2099-05-24 20:00</span>
+        </article>
+        <article>
+          <a href="/acm/contest/222">\u725b\u5ba2\u6708\u8d5b Round 222</a>
+          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 19:00 \u81f3 2099-05-24 21:00</span>
+        </article>
+        <article>
+          <a href="/acm/contest/333">\u725b\u5ba2\u6311\u6218\u8d5b333</a>
+          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 21:30 \u81f3 2099-05-24 23:30</span>
+        </article>
+      </main>
+    `), ["https://example.invalid/nowcoder"], new Date("2099-05-24T12:15:00.000Z"));
+
+    expect(contests.map((contest) => contest.id)).toEqual(["nowcoder:333"]);
   });
 
   test("continues Nowcoder parsing when one candidate page fails", async () => {
@@ -143,7 +187,8 @@ describe("contest providers", () => {
           </article>
         `);
       }) as typeof fetch,
-      ["https://example.invalid/first", "https://example.invalid/second"]
+      ["https://example.invalid/first", "https://example.invalid/second"],
+      new Date("2026-05-21T00:00:00.000Z")
     );
 
     expect(contests.map((contest) => contest.id)).toEqual(["nowcoder:555"]);

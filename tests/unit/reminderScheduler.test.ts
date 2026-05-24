@@ -147,4 +147,55 @@ describe("daily reminder scheduler", () => {
     expect(notify).not.toHaveBeenCalled();
     expect(getDailyReminderState(db, "2026-05-22")).toBeNull();
   });
+
+  test("today contest reminders include only contests that have not started", async () => {
+    const openedReminder = vi.fn();
+    const notify = vi.fn();
+    const now = new Date(2026, 4, 24, 20, 15);
+
+    updateAppSettings(db, { imageRandomReminderEnabled: false });
+    upsertContestCache(db, [
+      {
+        platform: "nowcoder",
+        providerContestId: "nowcoder:ended",
+        title: "Ended Nowcoder Round",
+        url: "https://ac.nowcoder.com/acm/contest/1",
+        startTimeIso: new Date(2026, 4, 24, 18, 0).toISOString(),
+        endTimeIso: new Date(2026, 4, 24, 20, 0).toISOString(),
+        durationSeconds: 7200,
+        fetchedAtIso: now.toISOString()
+      },
+      {
+        platform: "nowcoder",
+        providerContestId: "nowcoder:running",
+        title: "Running Nowcoder Round",
+        url: "https://ac.nowcoder.com/acm/contest/2",
+        startTimeIso: new Date(2026, 4, 24, 19, 0).toISOString(),
+        endTimeIso: new Date(2026, 4, 24, 21, 0).toISOString(),
+        durationSeconds: 7200,
+        fetchedAtIso: now.toISOString()
+      },
+      {
+        platform: "nowcoder",
+        providerContestId: "nowcoder:future",
+        title: "Future Nowcoder Round",
+        url: "https://ac.nowcoder.com/acm/contest/3",
+        startTimeIso: new Date(2026, 4, 24, 21, 30).toISOString(),
+        endTimeIso: new Date(2026, 4, 24, 23, 30).toISOString(),
+        durationSeconds: 7200,
+        fetchedAtIso: now.toISOString()
+      }
+    ]);
+
+    const result = await runDailyReminder(
+      {
+        db,
+        notify,
+        windows: { showReminderWindow: openedReminder }
+      },
+      { manual: true, now }
+    );
+
+    expect(result.contests.map((contest) => contest.title)).toEqual(["Future Nowcoder Round"]);
+  });
 });
