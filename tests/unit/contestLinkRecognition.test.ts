@@ -73,6 +73,26 @@ describe("contest link recognition", () => {
     expect(metadata.title).toBe("The 3rd Universal Cup. Stage 8: Cangqian");
   });
 
+  test("recognizes QOJ title from Universal Cup standings when contest pages are protected", async () => {
+    const metadata = await recognizeContestLink(
+      "https://qoj.ac/contest/1668",
+      responseFetch({
+        "https://qoj.ac/contest/1668": `<title>Just a moment...</title>`,
+        "https://contest.ucup.ac/contest/1668": `<title>403 - Universal Cup Judging System</title>`,
+        "https://contest.ucup.ac/results/QOJ1668": `
+          <html>
+            <body>
+              <h2>2024 北京市大学生程序设计竞赛</h2>
+              <p>Enter Contest: <a href="https://qoj.ac/contest/1668">https://qoj.ac/contest/1668</a></p>
+            </body>
+          </html>
+        `
+      })
+    );
+
+    expect(metadata.title).toBe("2024 北京市大学生程序设计竞赛");
+  });
+
   test("recognizes Nowcoder title from pageInfo instead of the generic document title", async () => {
     const expectedTitle =
       "2024\u5e74\u56fd\u9645\u5927\u5b66\u751f\u7a0b\u5e8f\u8bbe\u8ba1\u7ade\u8d5b\uff08ACM-ICPC\uff09\u65b0\u7586\u8d5b\u533a\u5927\u8d5b";

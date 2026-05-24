@@ -38,6 +38,7 @@ function isUsefulTitle(title: string): boolean {
       normalized !== "just a moment..." &&
       normalized !== "login" &&
       normalized !== "login - qoj.ac" &&
+      !/^\d{3}$/.test(normalized) &&
       !normalized.startsWith("403 - ") &&
       !normalized.startsWith("404 - ")
   );
@@ -177,24 +178,59 @@ async function fetchUniversalCupQojTitle(url: URL, fetcher: FetchLike): Promise<
     return "";
   }
 
+  const candidateUrls = [
+    `https://contest.ucup.ac/contest/${contestId}`,
+    `https://contest.ucup.ac/results/QOJ${contestId}`,
+    `https://contest.ucup.ac/results/${contestId}`
+  ];
+
+  return firstUsefulTitle(
+    candidateUrls.map((candidateUrl) => fetchUniversalCupCandidateTitle(candidateUrl, fetcher))
+  );
+}
+
+async function fetchUniversalCupCandidateTitle(candidateUrl: string, fetcher: FetchLike): Promise<string> {
   try {
-    const response = await fetcher(`https://contest.ucup.ac/contest/${contestId}`);
+    const response = await fetcher(candidateUrl, {
+      headers: {
+        "user-agent": "ACM-Trainer/0.1"
+      }
+    });
 
     if (!response.ok) {
       return "";
     }
 
     const html = await response.text();
-    const $ = cheerio.load(html);
-    const title = cleanText($("title").first().text() || $("h1").first().text())
-      .replace(/\s+-\s+Dashboard\s+-\s+Contest\s+-\s+Universal Cup Judging System$/i, "")
-      .replace(/\s+-\s+Universal Cup$/i, "")
-      .replace(/\s+\|\s+Universal Cup$/i, "");
+    const title = extractUniversalCupTitle(html);
 
     return isUsefulTitle(title) ? title : "";
   } catch {
     return "";
   }
+}
+
+function cleanUniversalCupTitle(value: string): string {
+  return cleanText(value)
+    .replace(/\s+-\s+Dashboard\s+-\s+Contest\s+-\s+Universal Cup Judging System$/i, "")
+    .replace(/\s+-\s+Universal Cup Judging System$/i, "")
+    .replace(/\s+-\s+Universal Cup$/i, "")
+    .replace(/\s+\|\s+Universal Cup$/i, "");
+}
+
+function extractUniversalCupTitle(html: string): string {
+  const $ = cheerio.load(html);
+  const candidates = [$("h2").first().text(), $("h1").first().text(), $("title").first().text()];
+
+  for (const candidate of candidates) {
+    const title = cleanUniversalCupTitle(candidate);
+
+    if (isUsefulTitle(title) && title.toLowerCase() !== "universal cup judging system") {
+      return title;
+    }
+  }
+
+  return "";
 }
 
 function extractVjudgeTitle(html: string): string {
@@ -219,6 +255,60 @@ function extractPlatformTitle(platform: Platform, url: URL, html: string): strin
   return extractLinkMetadata(html).title;
 }
 
+async function firstUsefulTitle(titlePromises: Array<Promise<string>>): Promise<string> {
+  if (!titlePromises.length) {
+    return "";
+  }
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let remaining = titlePromises.length;
+
+    const resolveEmptyIfFinished = () => {
+      remaining -= 1;
+      if (!settled && remaining === 0) {
+        settled = true;
+        resolve("");
+      }
+    };
+
+    for (const titlePromise of titlePromises) {
+      titlePromise
+        .then((title) => {
+          if (!settled && isUsefulTitle(title)) {
+            settled = true;
+            resolve(title);
+            return;
+          }
+
+          resolveEmptyIfFinished();
+        })
+        .catch(resolveEmptyIfFinished);
+    }
+  });
+}
+
+async function fetchContestPageTitle(platform: Platform, url: URL, fetcher: FetchLike): Promise<string> {
+  try {
+    const response = await fetcher(url.toString(), {
+      headers: {
+        "user-agent": "ACM-Trainer/0.1"
+      }
+    });
+
+    if (!response.ok) {
+      return "";
+    }
+
+    const html = await response.text();
+    const pageTitle = extractPlatformTitle(platform, url, html);
+
+    return isUsefulTitle(pageTitle) ? pageTitle : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function recognizeContestLink(
   rawUrl: unknown,
   fetcher: FetchLike = fetch
@@ -236,27 +326,17 @@ export async function recognizeContestLink(
     title = await fetchCodeforcesContestTitle(parsedUrl, fetcher);
   }
 
-  try {
-    const response = await fetcher(parsedUrl.toString(), {
-      headers: {
-        "user-agent": "ACM-Trainer/0.1"
-      }
-    });
+  if (platform === "qoj") {
+    title = await firstUsefulTitle([
+      fetchContestPageTitle(platform, parsedUrl, fetcher),
+      fetchUniversalCupQojTitle(parsedUrl, fetcher)
+    ]);
+  } else {
+    const pageTitle = await fetchContestPageTitle(platform, parsedUrl, fetcher);
 
-    if (response.ok) {
-      const html = await response.text();
-      const pageTitle = extractPlatformTitle(platform, parsedUrl, html);
-
-      if (isUsefulTitle(pageTitle)) {
-        title = pageTitle;
-      }
+    if (isUsefulTitle(pageTitle)) {
+      title = pageTitle;
     }
-  } catch {
-    title = title || "";
-  }
-
-  if (platform === "qoj" && !isUsefulTitle(title)) {
-    title = await fetchUniversalCupQojTitle(parsedUrl, fetcher);
   }
 
   return {
