@@ -35,8 +35,7 @@ import { getAutostartEnabled, setAutostartEnabled } from "./autostart.js";
 import { refreshContestCache } from "./contestRefresh.js";
 import { deleteStoredImage, importImageFiles, readImageDataUrl } from "./mediaImport.js";
 import { notifyTimerComplete, openTimerWindow, setTimerAlwaysOnTop } from "./timerWindow.js";
-import { extractLinkMetadata } from "../shared/linkMetadata.js";
-import { detectPlatformFromUrl } from "../shared/platforms.js";
+import { recognizeContestLink } from "./linkRecognition.js";
 import type { AppSettings } from "../shared/types.js";
 import type { WindowManager } from "./windows.js";
 
@@ -67,32 +66,6 @@ function localUpcomingDayRange(now = new Date()): { fromIso: string; toIso: stri
     fromIso: now.toISOString(),
     toIso: to.toISOString()
   };
-}
-
-async function recognizeContestLink(rawUrl: unknown) {
-  const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
-  const platform = detectPlatformFromUrl(url);
-  let title = "";
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:") {
-      const response = await fetch(parsedUrl, {
-        headers: {
-          "user-agent": "ACM-Trainer/0.1"
-        }
-      });
-
-      if (response.ok) {
-        title = extractLinkMetadata(await response.text()).title;
-      }
-    }
-  } catch {
-    title = "";
-  }
-
-  return { url, platform, title };
 }
 
 function readSettings(db: AppDatabase): AppSettings {

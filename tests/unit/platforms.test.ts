@@ -4,6 +4,7 @@ import { detectPlatformFromUrl } from "../../src/shared/platforms";
 describe("platform detection", () => {
   test.each([
     ["https://codeforces.com/contest/2042", "codeforces"],
+    ["https://codeforces.com/gym/105945", "codeforces"],
     ["https://atcoder.jp/contests/abc400", "atcoder"],
     ["https://ac.nowcoder.com/acm/contest/99999", "nowcoder"],
     ["https://qoj.ac/contest/1234", "qoj"],

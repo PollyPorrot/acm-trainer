@@ -50,7 +50,7 @@ export function detectPlatformFromUrl(value: string): Platform {
   const hostname = url.hostname.toLowerCase();
   const pathname = url.pathname.toLowerCase();
 
-  if (hasHost(hostname, "codeforces.com") && pathname.startsWith("/contest/")) {
+  if (hasHost(hostname, "codeforces.com") && (pathname.startsWith("/contest/") || pathname.startsWith("/gym/"))) {
     return "codeforces";
   }
 
