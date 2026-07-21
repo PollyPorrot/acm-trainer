@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify tag matches package version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $packageVersion = node -p "require('./package.json').version"
+          $expectedTag = "v$packageVersion"
+          if ($env:RELEASE_TAG -cne $expectedTag) {
+            throw "Tag '$env:RELEASE_TAG' does not match package version '$expectedTag'."
+          }
+      - run: npm test -- --run
+      - run: npm run package
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $installers = @(Get-ChildItem -Path (Join-Path $PWD 'dist-packaged') -Filter '*Setup*.exe' -File -ErrorAction Stop)
+          if ($installers.Count -ne 1) {
+            throw "Expected exactly one Setup executable in dist-packaged, found $($installers.Count)."
+          }
+
+          $installerPath = $installers[0].FullName
+          gh release create "$env:RELEASE_TAG" "$installerPath" --verify-tag --generate-notes --title "ACM Trainer $env:RELEASE_TAG"
