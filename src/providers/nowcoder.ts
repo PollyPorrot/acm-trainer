@@ -9,6 +9,7 @@ export const NOWCODER_CONTEST_URLS = [
 type FetchLike = (input: string) => Promise<Pick<Response, "ok" | "status" | "text">>;
 
 const AUTO_SERIES_PATTERN = /\u5468\u8d5b|\u6708\u8d5b|\u6311\u6218\u8d5b/;
+const NOWCODER_UTC_OFFSET_HOURS = 8;
 const DATE_SOURCE = "(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})\\s+(\\d{1,2}):(\\d{2})";
 const NOWCODER_DATE_PATTERN = new RegExp(DATE_SOURCE);
 const NOWCODER_CONTEST_TIME_PATTERN = new RegExp(
@@ -37,7 +38,15 @@ function parseDateGroups(match: RegExpExecArray, startIndex: number): string | n
   }
 
   const [year, month, day, hours, minutes] = match.slice(startIndex, startIndex + 5);
-  const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes), 0, 0);
+  const date = new Date(Date.UTC(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hours) - NOWCODER_UTC_OFFSET_HOURS,
+    Number(minutes),
+    0,
+    0
+  ));
 
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }

@@ -150,24 +150,36 @@ describe("contest providers", () => {
   });
 
   test("skips Nowcoder contests that already started", async () => {
-    const contests = await fetchNowcoderContests(responseFetch(`
-      <main>
-        <article>
-          <a href="/acm/contest/111">\u725b\u5ba2\u5468\u8d5b Round 111</a>
-          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 18:00 \u81f3 2099-05-24 20:00</span>
-        </article>
-        <article>
-          <a href="/acm/contest/222">\u725b\u5ba2\u6708\u8d5b Round 222</a>
-          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 19:00 \u81f3 2099-05-24 21:00</span>
-        </article>
-        <article>
-          <a href="/acm/contest/333">\u725b\u5ba2\u6311\u6218\u8d5b333</a>
-          <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 21:30 \u81f3 2099-05-24 23:30</span>
-        </article>
-      </main>
-    `), ["https://example.invalid/nowcoder"], new Date("2099-05-24T12:15:00.000Z"));
+    const previousTimezone = process.env.TZ;
+    process.env.TZ = "UTC";
 
-    expect(contests.map((contest) => contest.id)).toEqual(["nowcoder:333"]);
+    try {
+      const contests = await fetchNowcoderContests(responseFetch(`
+        <main>
+          <article>
+            <a href="/acm/contest/111">\u725b\u5ba2\u5468\u8d5b Round 111</a>
+            <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 18:00 \u81f3 2099-05-24 20:00</span>
+          </article>
+          <article>
+            <a href="/acm/contest/222">\u725b\u5ba2\u6708\u8d5b Round 222</a>
+            <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 19:00 \u81f3 2099-05-24 21:00</span>
+          </article>
+          <article>
+            <a href="/acm/contest/333">\u725b\u5ba2\u6311\u6218\u8d5b333</a>
+            <span>\u6bd4\u8d5b\u65f6\u95f4\uff1a 2099-05-24 21:30 \u81f3 2099-05-24 23:30</span>
+          </article>
+        </main>
+      `), ["https://example.invalid/nowcoder"], new Date("2099-05-24T12:15:00.000Z"));
+
+      expect(contests.map((contest) => contest.id)).toEqual(["nowcoder:333"]);
+      expect(contests[0]?.startTimeIso).toBe("2099-05-24T13:30:00.000Z");
+    } finally {
+      if (previousTimezone === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = previousTimezone;
+      }
+    }
   });
 
   test("continues Nowcoder parsing when one candidate page fails", async () => {
